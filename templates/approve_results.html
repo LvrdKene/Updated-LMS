@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h3>Review Pending Results</h3>
+<div class="card mb-4">
+    <div class="card-body">
+        {% if tests %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Test</th>
+                    <th>Technician Comments/Results</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in tests %}
+                <tr>
+                    <td><strong>{{ test.patient.name }}</strong></td>
+                    <td>{{ test.test_type }}</td>
+                    <td>
+                        <div style="max-width: 400px; white-space: pre-wrap;">{{ test.result_data }}</div>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('approve', test_id=test.id) }}" class="btn btn-success btn-sm">Approve</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted text-center py-4">No pending results to review.</p>
+        {% endif %}
+    </div>
+</div>
+
+<h3 class="mt-5">Approved Reports (Ready to Print)</h3>
+<div class="card">
+    <div class="card-body">
+        {% if approved_tests %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Patient Name</th>
+                    <th>Test Type</th>
+                    <th>Date Approved</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in approved_tests %}
+                <tr>
+                    <td><strong>{{ test.patient.name }}</strong></td>
+                    <td>{{ test.test_type }}</td>
+                    <td>{{ test.date_created.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <a href="{{ url_for('generate_report', test_id=test.id) }}" class="btn btn-dark btn-sm">
+                            Download PDF
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted text-center py-4">No approved reports available yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

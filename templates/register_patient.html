@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block content %}
+<h3>Patient Registration</h3>
+<form method="POST" class="card p-4">
+    <div class="mb-3"><label>Name</label><input type="text" name="name" class="form-control" required></div>
+    <div class="row">
+        <div class="col"><label>Age</label><input type="number" name="age" class="form-control" required></div>
+        <div class="col"><label>Gender</label><select name="gender" class="form-control"><option>Male</option><option>Female</option></select></div>
+    </div>
+    <div class="mb-3 mt-2"><label>Contact</label><input type="text" name="contact" class="form-control"></div>
+    <div class="mb-3">
+    <label class="form-label">Test Required</label>
+    <select name="test_type" class="form-select" required>
+        <option value="" selected disabled>-- Select a Test --</option>
+        
+        <optgroup label="Hematology">
+            <option value="Full Blood Count (FBC/CBC)">Full Blood Count (FBC/CBC)</option>
+            <option value="Packed Cell Volume (PCV)">Packed Cell Volume (PCV)</option>
+            <option value="Blood Group & Rh Typing">Blood Group & Rh Typing</option>
+            <option value="ESR">ESR (Sedimentation Rate)</option>
+            <option value="Genotype (Hb Electrophoresis)">Genotype (Hb Electrophoresis)</option>
+        </optgroup>
+
+        <optgroup label="Chemistry / Metabolism">
+            <option value="Fasting Blood Sugar (FBS)">Fasting Blood Sugar (FBS)</option>
+            <option value="Liver Function Test (LFT)">Liver Function Test (LFT)</option>
+            <option value="Kidney Function Test (E/U/Cr)">Kidney Function Test (Urea/Creatinine)</option>
+            <option value="Lipid Profile (Cholesterol)">Lipid Profile (Cholesterol)</option>
+            <option value="HbA1c (Diabetes Monitoring)">HbA1c</option>
+        </optgroup>
+
+        <optgroup label="Microbiology / Serology">
+            <option value="Malaria Parasite (MP)">Malaria Parasite (MP)</option>
+            <option value="Widal Test (Typhoid)">Widal Test (Typhoid)</option>
+            <option value="Urinalysis (Dipstick & Microscopy)">Urinalysis</option>
+            <option value="Hepatitis B (HBsAg)">Hepatitis B (HBsAg)</option>
+            <option value="HIV 1 & 2 Screen">HIV 1 & 2 Screen</option>
+            <option value="Stool Analysis">Stool Analysis</option>
+        </optgroup>
+    </select>
+</div>
+    <button class="btn btn-success">Register & Create Sample</button>
+</form>
+{% endblock %}

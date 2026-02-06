@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <h3>Patient History</h3>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date Registered</th>
+                    <th>Patient Name</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Contact</th>
+                    <th>Tests</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr>
+                    <td>{{ patient.id }}</td>
+                    <td>
+                        {% if patient.tests %}
+                            {{ patient.tests[0].date_created.strftime('%Y-%m-%d') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td><strong>{{ patient.name }}</strong></td>
+                    <td>{{ patient.age }}</td>
+                    <td>{{ patient.gender }}</td>
+                    <td>{{ patient.contact }}</td>
+                    <td>
+                        {% for test in patient.tests %}
+                            <span class="badge 
+                                {% if test.status == 'Approved' %}bg-success
+                                {% elif test.status == 'Completed' %}bg-info
+                                {% elif test.status == 'Pending' %}bg-warning
+                                {% else %}bg-secondary{% endif %}">
+                                {{ test.test_type }} ({{ test.status }})
+                            </span>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#patient{{ patient.id }}">
+                            View Tests
+                        </button>
+                    </td>
+                </tr>
+                <tr class="collapse" id="patient{{ patient.id }}">
+                    <td colspan="8" style="background: #f8f9fa;">
+                        <div class="p-3">
+                            <h6>Test Details:</h6>
+                            {% if patient.tests %}
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Test Type</th>
+                                            <th>Status</th>
+                                            <th>Date Created</th>
+                                            <th>Technician Comments/Results</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for test in patient.tests %}
+                                        <tr>
+                                            <td>{{ test.test_type }}</td>
+                                            <td>
+                                                <span class="badge 
+                                                    {% if test.status == 'Approved' %}bg-success
+                                                    {% elif test.status == 'Completed' %}bg-info
+                                                    {% elif test.status == 'Pending' %}bg-warning
+                                                    {% else %}bg-secondary{% endif %}">
+                                                    {{ test.status }}
+                                                </span>
+                                            </td>
+                                            <td>{{ test.date_created.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>
+                                                {% if test.result_data %}
+                                                    <div style="white-space: pre-wrap; max-width: 400px;">{{ test.result_data }}</div>
+                                                {% else %}
+                                                    <em class="text-muted">No result yet</em>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% else %}
+                                <p class="text-muted">No tests found for this patient.</p>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,277 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style>
+    .inventory-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .add-item-card {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    .add-item-card h5 {
+        margin-bottom: 15px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .add-item-card input {
+        border: 1px solid #ced4da;
+        background: white;
+        border-radius: 4px;
+        padding: 8px 12px;
+    }
+
+    .add-item-card input:focus {
+        background: white;
+        border-color: #80bdff;
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+
+    .add-item-card .btn-create {
+        background: #007bff;
+        color: white;
+        font-weight: 400;
+        border-radius: 4px;
+        padding: 8px 12px;
+        border: 1px solid #007bff;
+    }
+
+    .add-item-card .btn-create:hover {
+        background: #0056b3;
+        border-color: #0056b3;
+    }
+
+    .inventory-table {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .inventory-table table {
+        margin-bottom: 0;
+    }
+
+    .inventory-table thead {
+        background: #f8f9fa;
+    }
+
+    .inventory-table th {
+        font-weight: 600;
+        font-size: 14px;
+        color: #495057;
+        padding: 12px;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .inventory-table td {
+        padding: 12px;
+        vertical-align: middle;
+        border-bottom: 1px solid #dee2e6;
+        font-size: 14px;
+        color: #212529;
+    }
+
+    .inventory-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .inventory-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .stock-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .stock-controls input {
+        width: 70px;
+        padding: 5px 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        text-align: center;
+    }
+
+    .stock-controls input:focus {
+        border-color: #80bdff;
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+
+    .btn-stock {
+        padding: 5px 12px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 400;
+        cursor: pointer;
+        transition: none;
+    }
+
+    .btn-add {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+
+    .btn-add:hover {
+        background: #218838;
+        border-color: #1e7e34;
+    }
+
+    .btn-reduce {
+        background: #dc3545;
+        color: white;
+        border-color: #dc3545;
+    }
+
+    .btn-reduce:hover {
+        background: #c82333;
+        border-color: #bd2130;
+    }
+
+    .btn-delete {
+        background: #6c757d;
+        color: white;
+        border-color: #6c757d;
+        padding: 5px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .btn-delete:hover {
+        background: #5a6268;
+        border-color: #545b62;
+    }
+
+    .item-name {
+        font-weight: 500;
+        color: #212529;
+        font-size: 14px;
+    }
+
+    .stock-quantity {
+        font-size: 16px;
+        font-weight: 600;
+        color: #212529;
+    }
+
+    .alert {
+        border-radius: 4px;
+        border: 1px solid transparent;
+        margin-bottom: 15px;
+        padding: 12px 20px;
+    }
+</style>
+
+<div class="inventory-header">
+    <h3>Inventory Management</h3>
+</div>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            {% if 'added' in message.lower() or 'created' in message.lower() or 'reduced' in message.lower() %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% else %}
+                <div class="alert alert-danger">{{ message }}</div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="add-item-card">
+    <h5>Add New Inventory Item</h5>
+    <form method="POST" class="row g-3">
+        <div class="col-md-5">
+            <input type="text" name="new_item_name" class="form-control" placeholder="Item Name (e.g. Syringes)" required>
+        </div>
+        <div class="col-md-3">
+            <input type="number" name="initial_qty" class="form-control" placeholder="Initial Quantity" required min="0">
+        </div>
+        <div class="col-md-2">
+            <input type="number" name="threshold" class="form-control" placeholder="Low Alert" value="10" required min="0">
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-create w-100">Create Item</button>
+        </div>
+    </form>
+</div>
+
+<div class="inventory-table">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Status</th>
+                <th>Current Stock</th>
+                <th>Manage Stock</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if items %}
+                {% for item in items %}
+                <tr>
+                    <td class="item-name">{{ item.item_name }}</td>
+                    <td>
+                        {% if item.quantity <= item.low_stock_threshold %}
+                            <span class="badge bg-danger">Low Stock</span>
+                        {% elif item.quantity <= item.low_stock_threshold * 2 %}
+                            <span class="badge bg-warning text-dark">Medium</span>
+                        {% else %}
+                            <span class="badge bg-success">In Stock</span>
+                        {% endif %}
+                    </td>
+                    <td class="stock-quantity">{{ item.quantity }}</td>
+                    <td>
+                        <div class="stock-controls">
+                            <form method="POST" style="display: inline-flex; gap: 8px; align-items: center;">
+                                <input type="hidden" name="item_id" value="{{ item.id }}">
+                                <input type="hidden" name="action" value="add">
+                                <input type="number" name="qty" class="form-control-sm" value="1" min="1" required>
+                                <button class="btn-stock btn-add">Add</button>
+                            </form>
+                            
+                            <form method="POST" style="display: inline-flex; gap: 8px; align-items: center;">
+                                <input type="hidden" name="item_id" value="{{ item.id }}">
+                                <input type="hidden" name="action" value="reduce">
+                                <input type="number" name="qty" class="form-control-sm" value="1" min="1" max="{{ item.quantity }}" required>
+                                <button class="btn-stock btn-reduce">Reduce</button>
+                            </form>
+                        </div>
+                    </td>
+                    <td>
+                        <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete {{ item.item_name }}?');">
+                            <input type="hidden" name="item_id" value="{{ item.id }}">
+                            <input type="hidden" name="action" value="delete">
+                            <button class="btn-delete">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-5">
+                        No inventory items found. Add one above to get started.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

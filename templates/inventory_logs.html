@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <h3>Inventory Usage Logs</h3>
+        <p class="text-muted mb-0">Track who used what inventory items</p>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Date/Time</th>
+                    <th>Item Name</th>
+                    <th>Action</th>
+                    <th>Quantity</th>
+                    <th>User</th>
+                    <th>Test ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td><strong>{{ log.item_name }}</strong></td>
+                    <td>
+                        <span class="badge 
+                            {% if log.action == 'added' %}bg-success
+                            {% elif log.action == 'reduced' %}bg-warning
+                            {% elif log.action == 'used_for_test' %}bg-info
+                            {% else %}bg-secondary{% endif %}">
+                            {{ log.action }}
+                        </span>
+                    </td>
+                    <td>{{ log.quantity }}</td>
+                    <td>{{ log.user }}</td>
+                    <td>
+                        {% if log.test_id %}
+                            <a href="{{ url_for('test_results', test_id=log.test_id) }}" class="btn btn-sm btn-link">
+                                Test #{{ log.test_id }}
+                            </a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% if not logs %}
+        <p class="text-center text-muted py-4">No inventory logs found.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

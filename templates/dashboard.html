@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Laboratory Dashboard</h2>
+<div class="row mb-4">
+    <div class="col-md-4"><div class="card p-3 bg-warning">Pending Tests: {{ pending }}</div></div>
+    <div class="col-md-4"><div class="card p-3 bg-success text-white">Completed Tests: {{ completed }}</div></div>
+</div>
+
+{% if low_stock %}
+<div class="alert alert-danger">
+    <strong>Low Stock Alert!!:</strong>
+    <ul>{% for item in low_stock %}<li>{{ item.item_name }} (Only {{ item.quantity }} left)</li>{% endfor %}</ul>
+</div>
+{% endif %}
+
+{% if current_user.role == 'Technician' %}
+    <h3>Tests Assigned to Queue</h3>
+    <table class="table">
+        <tr><th>Patient</th><th>Test</th><th>Action</th></tr>
+        {% for test in my_tests %}
+        <tr>
+            <td>{{ test.patient.name }}</td>
+            <td>{{ test.test_type }}</td>
+            <td><a href="{{ url_for('test_results', test_id=test.id) }}" class="btn btn-sm btn-primary">Process</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endif %}
+{% endblock %}
