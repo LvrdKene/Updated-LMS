@@ -3,7 +3,11 @@ from datetime import datetime, timedelta
 from flask import Flask, render_template, redirect, url_for, request, flash, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from weasyprint import HTML
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
 import io
 
 app = Flask(__name__)
@@ -101,6 +105,9 @@ def dashboard():
     completed_tests = Test.query.filter_by(status='Completed').count()
     low_stock = Inventory.query.filter(Inventory.quantity <= Inventory.low_stock_threshold).all()
     
+    # Fetch recent activities for Recent Activity section
+    recent_activities = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(10).all()
+    
     my_tests = []
     if current_user.role == 'Technician':
         my_tests = Test.query.filter_by(status='Pending').all()
@@ -109,7 +116,8 @@ def dashboard():
                            pending=pending_tests, 
                            completed=completed_tests, 
                            low_stock=low_stock,
-                           my_tests=my_tests)
+                           my_tests=my_tests,
+                           recent_activities=recent_activities)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -443,12 +451,67 @@ def generate_report(test_id):
     test = Test.query.get_or_404(test_id)
     if test.status != 'Approved':
         return "Result not approved yet.", 403
-        
-    html = render_template('report_template.html', test=test)
-    pdf = HTML(string=html).write_pdf()
+    
+    # Create PDF using reportlab
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    
+    # Custom styles
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor='#2c3e50',
+        spaceAfter=30,
+        alignment=TA_CENTER
+    )
+    
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor='#34495e',
+        spaceAfter=12
+    )
+    
+    # Build PDF content
+    story = []
+    
+    # Title
+    story.append(Paragraph("Laboratory Test Report", title_style))
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Patient Information
+    story.append(Paragraph("Patient Information", heading_style))
+    story.append(Paragraph(f"<b>Name:</b> {test.patient.name}", styles['Normal']))
+    story.append(Paragraph(f"<b>Age:</b> {test.patient.age}", styles['Normal']))
+    story.append(Paragraph(f"<b>Gender:</b> {test.patient.gender}", styles['Normal']))
+    story.append(Paragraph(f"<b>Contact:</b> {test.patient.contact or 'N/A'}", styles['Normal']))
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Test Information
+    story.append(Paragraph("Test Information", heading_style))
+    story.append(Paragraph(f"<b>Test Type:</b> {test.test_type}", styles['Normal']))
+    story.append(Paragraph(f"<b>Status:</b> {test.status}", styles['Normal']))
+    story.append(Paragraph(f"<b>Date:</b> {test.date_created.strftime('%Y-%m-%d %H:%M')}", styles['Normal']))
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Results
+    story.append(Paragraph("Results", heading_style))
+    story.append(Paragraph(test.result_data or "No results available", styles['Normal']))
+    story.append(Spacer(1, 0.5*inch))
+    
+    # Footer
+    story.append(Paragraph("_" * 50, styles['Normal']))
+    story.append(Paragraph("This is an official laboratory report", styles['Italic']))
+    
+    # Build PDF
+    doc.build(story)
+    buffer.seek(0)
     
     return send_file(
-        io.BytesIO(pdf),
+        buffer,
         mimetype='application/pdf',
         as_attachment=True,
         download_name=f'Result_{test.patient.name}.pdf'

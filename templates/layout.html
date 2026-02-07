@@ -1,52 +1,484 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Lab System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gou-Lab Sys</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; }
-        .sidebar { min-height: 100vh; background: #2c3e50; color: white; }
-        .sidebar a { color: white; text-decoration: none; display: block; padding: 10px; }
-        .sidebar a:hover { background: #34495e; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 280px;
+            background: linear-gradient(180deg, #1a1f3a 0%, #2d3561 50%, #1a1f3a 100%);
+            color: white;
+            padding: 0;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 0;
+            display: none;
+        }
+
+        .sidebar {
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-section::-webkit-scrollbar {
+            width: 0;
+            display: none;
+        }
+
+        .nav-section {
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
+        }
+
+        .sidebar-header {
+            padding: 30px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            50% {
+                transform: scale(1.2) rotate(180deg);
+            }
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-text h4 {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text p {
+            font-size: 11px;
+            margin: 0;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .user-profile {
+            padding: 20px 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .user-info h6 {
+            font-size: 12px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            color: white;
+        }
+
+        .user-role {
+            display: inline-block;
+            font-size: 10px;
+            padding: 4px 10px;
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            color: #a5b4fc;
+            font-weight: 500;
+        }
+
+        .nav-section {
+            padding: 15px 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-section-title {
+            padding: 8px 25px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 5px;
+        }
+
+        .nav-link-custom {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            margin: 2px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link-custom::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link-custom:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-link-custom:hover::before {
+            transform: scaleY(1);
+        }
+
+        .nav-link-custom.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            color: white;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-link-custom.active::before {
+            transform: scaleY(1);
+        }
+
+        .nav-icon {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .logout-section {
+            flex-shrink: 0;
+            padding: 20px 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+        }
+
+        .logout-link {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .logout-link:hover {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff5252;
+            transform: translateX(5px);
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .alert {
+            border-radius: 12px;
+            border: none;
+            padding: 16px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+            color: #0369a1;
+            border-left: 4px solid #0284c7;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .sidebar-header {
+                padding: 20px 10px;
+            }
+
+            .logo-text,
+            .user-info,
+            .nav-section-title {
+                display: none;
+            }
+
+            .logo-icon {
+                margin: 0 auto;
+            }
+
+            .user-avatar {
+                margin: 0 auto;
+            }
+
+            .nav-link-custom {
+                justify-content: center;
+                padding: 12px;
+                margin: 2px 10px;
+            }
+
+            .nav-icon {
+                margin-right: 0;
+            }
+
+            .nav-link-custom span:not(.nav-icon) {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 70px;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 0;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                width: 280px;
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
+
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            {% if current_user.is_authenticated %}
-            <div class="col-md-2 sidebar p-3">
-                <h4>OpenLab LMS</h4>
-                <hr>
-                <p>User: <strong>{{ current_user.username }}</strong> ({{ current_user.role }})</p>
-                <a href="{{ url_for('dashboard') }}">Dashboard</a>
-                {% if current_user.role in ['Receptionist', 'Admin'] %}
-                <a href="{{ url_for('register_patient') }}">Registration</a>
-                <a href="{{ url_for('payments') }}">Payments</a>
-                {% endif %}
-                {% if current_user.role in ['Admin', 'Technician'] %}
-                <a href="{{ url_for('patient_history') }}">Patient History</a>
-                {% endif %}
-                <a href="{{ url_for('inventory') }}">Inventory</a>
-                {% if current_user.role == 'Admin' %}
-                <a href="{{ url_for('inventory_logs') }}">Inventory Logs</a>
-                <a href="{{ url_for('approve_results') }}">Approvals</a>
-                <a href="{{ url_for('manage_users') }}">Manage Users</a>
-                {% endif %}
-                <hr>
-                <a href="{{ url_for('logout') }}" class="text-danger">Logout</a>
-            </div>
-            {% endif %}
-            
-            <div class="col-md-10 p-4">
-                {% with messages = get_flashed_messages() %}
-                    {% if messages %}
-                        <div class="alert alert-info">{{ messages[0] }}</div>
-                    {% endif %}
-                {% endwith %}
-                {% block content %}{% endblock %}
+    {% if current_user.is_authenticated %}
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-icon">G</div>
+                <div class="logo-text">
+                    <h4>Gou-Lab Sys</h4>
+                    <p>Laboratory Management</p>
+                </div>
             </div>
         </div>
+
+        <div class="user-profile">
+            <div class="user-avatar">{{ current_user.username[0].upper() }}</div>
+            <div class="user-info">
+                <h6>{{ current_user.username }}</h6>
+                <span class="user-role">{{ current_user.role }}</span>
+            </div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Main Menu</div>
+            <a href="{{ url_for('dashboard') }}" class="nav-link-custom">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+
+            {% if current_user.role in ['Receptionist', 'Admin'] %}
+            <a href="{{ url_for('register_patient') }}" class="nav-link-custom">
+                <span class="nav-icon">➕</span>
+                <span>Registration</span>
+            </a>
+            <a href="{{ url_for('payments') }}" class="nav-link-custom">
+                <span class="nav-icon">💳</span>
+                <span>Payments</span>
+            </a>
+            {% endif %}
+
+            {% if current_user.role in ['Admin', 'Technician'] %}
+            <a href="{{ url_for('patient_history') }}" class="nav-link-custom">
+                <span class="nav-icon">📋</span>
+                <span>Patient History</span>
+            </a>
+            {% endif %}
+
+            <a href="{{ url_for('inventory') }}" class="nav-link-custom">
+                <span class="nav-icon">📦</span>
+                <span>Inventory</span>
+            </a>
+
+            {% if current_user.role == 'Admin' %}
+            <div class="nav-section-title" style="margin-top: 15px;">Administration</div>
+            <a href="{{ url_for('inventory_logs') }}" class="nav-link-custom">
+                <span class="nav-icon">📝</span>
+                <span>Inventory Logs</span>
+            </a>
+            <a href="{{ url_for('approve_results') }}" class="nav-link-custom">
+                <span class="nav-icon">✅</span>
+                <span>Approvals</span>
+            </a>
+            <a href="{{ url_for('manage_users') }}" class="nav-link-custom">
+                <span class="nav-icon">👥</span>
+                <span>Manage Users</span>
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="logout-section">
+            <a href="{{ url_for('logout') }}" class="nav-link-custom logout-link">
+                <span class="nav-icon">🚪</span>
+                <span>Logout</span>
+            </a>
+        </div>
     </div>
+    {% endif %}
+
+    <div class="main-content">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert alert-info">{{ messages[0] }}</div>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add active class to current page
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link-custom');
+
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Mobile menu toggle (optional enhancement)
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('show');
+        }
+
+        // Persist sidebar scroll position
+        const navSection = document.querySelector('.nav-section');
+        if (navSection) {
+            // Restore scroll position
+            const scrollPos = localStorage.getItem('navScrollPos');
+            if (scrollPos) {
+                navSection.scrollTop = parseInt(scrollPos, 10);
+            }
+
+            // Save scroll position before leaving page
+            window.addEventListener('beforeunload', () => {
+                localStorage.setItem('navScrollPos', navSection.scrollTop);
+            });
+        }
+    </script>
 </body>
+
 </html>

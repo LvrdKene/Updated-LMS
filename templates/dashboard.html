@@ -1,29 +1,752 @@
 {% extends "layout.html" %}
 {% block content %}
-<h2>Laboratory Dashboard</h2>
-<div class="row mb-4">
-    <div class="col-md-4"><div class="card p-3 bg-warning">Pending Tests: {{ pending }}</div></div>
-    <div class="col-md-4"><div class="card p-3 bg-success text-white">Completed Tests: {{ completed }}</div></div>
+<style>
+    .dashboard-header {
+        margin-bottom: 35px;
+    }
+
+    .dashboard-header h2 {
+        font-size: 32px;
+        font-weight: 800;
+        color: #1a202c;
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+    }
+
+    .dashboard-header p {
+        color: #718096;
+        font-size: 15px;
+        font-weight: 400;
+    }
+
+    /* Quick Actions Section */
+    .quick-actions {
+        background: white;
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 35px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .quick-actions h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 20px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .quick-actions h3::before {
+        content: '⚡';
+        font-size: 24px;
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        text-decoration: none;
+        color: #334155;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 0;
+    }
+
+    .action-btn:hover::before {
+        opacity: 1;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        border-color: #667eea;
+        color: white;
+    }
+
+    .action-icon {
+        font-size: 24px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .action-text {
+        position: relative;
+        z-index: 1;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin-bottom: 35px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--card-gradient-start), var(--card-gradient-end));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .stat-card.warning {
+        --card-gradient-start: #f59e0b;
+        --card-gradient-end: #d97706;
+    }
+
+    .stat-card.success {
+        --card-gradient-start: #10b981;
+        --card-gradient-end: #059669;
+    }
+
+    .stat-card.info {
+        --card-gradient-start: #3b82f6;
+        --card-gradient-end: #2563eb;
+    }
+
+    .stat-card.purple {
+        --card-gradient-start: #667eea;
+        --card-gradient-end: #764ba2;
+    }
+
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 18px;
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        background: linear-gradient(135deg, var(--card-gradient-start), var(--card-gradient-end));
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .stat-content h3 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #64748b;
+        margin: 0 0 8px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        font-size: 36px;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+        line-height: 1;
+        letter-spacing: -1px;
+    }
+
+    .stat-footer {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #f1f5f9;
+        font-size: 13px;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    /* Recent Activity Section */
+    .recent-activity {
+        background: white;
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 35px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .recent-activity h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 24px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .recent-activity h3::before {
+        content: '🕐';
+        font-size: 24px;
+    }
+
+    .activity-timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .activity-timeline::before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 8px;
+        bottom: 8px;
+        width: 2px;
+        background: linear-gradient(180deg, #667eea 0%, #e2e8f0 100%);
+    }
+
+    .activity-item {
+        position: relative;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .activity-item:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .activity-item::before {
+        content: '';
+        position: absolute;
+        left: -26px;
+        top: 4px;
+        width: 12px;
+        height: 12px;
+        background: white;
+        border: 3px solid #667eea;
+        border-radius: 50%;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .activity-action {
+        font-size: 14px;
+        font-weight: 500;
+        color: #334155;
+        margin-bottom: 4px;
+    }
+
+    .activity-meta {
+        display: flex;
+        gap: 12px;
+        font-size: 12px;
+        color: #94a3b8;
+    }
+
+    .activity-user {
+        font-weight: 600;
+        color: #667eea;
+    }
+
+    .activity-time {
+        font-weight: 400;
+    }
+
+    .empty-activity {
+        text-align: center;
+        padding: 30px;
+        color: #94a3b8;
+    }
+
+    .empty-activity-icon {
+        font-size: 40px;
+        margin-bottom: 12px;
+        opacity: 0.5;
+    }
+
+    /* Alert Section */
+    .alert-section {
+        margin-bottom: 35px;
+    }
+
+    .alert-custom {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border: none;
+        border-left: 4px solid #dc2626;
+        border-radius: 12px;
+        padding: 20px 24px;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.15);
+        animation: slideIn 0.4s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .alert-custom strong {
+        color: #991b1b;
+        font-weight: 700;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .alert-custom strong::before {
+        content: '⚠️';
+        font-size: 20px;
+    }
+
+    .reagent-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .reagent-item {
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .reagent-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .reagent-item.critical {
+        background: rgba(220, 38, 38, 0.1);
+        border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+
+    .reagent-name {
+        font-weight: 600;
+        color: #b91c1c;
+        font-size: 14px;
+    }
+
+    .reagent-quantity {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .quantity-badge {
+        background: #dc2626;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .quantity-badge.critical {
+        background: #991b1b;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.7;
+        }
+    }
+
+    .stock-progress {
+        width: 100px;
+        height: 6px;
+        background: rgba(220, 38, 38, 0.2);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .stock-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #dc2626 0%, #f59e0b 100%);
+        transition: width 0.3s ease;
+    }
+
+    .alert-footer {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(185, 28, 28, 0.2);
+    }
+
+    .alert-link {
+        color: #991b1b;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .alert-link:hover {
+        color: #7f1d1d;
+        gap: 10px;
+    }
+
+    .alert-link::after {
+        content: '→';
+    }
+
+    .table-section {
+        background: white;
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .table-section h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 20px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .table-section h3::before {
+        content: '📋';
+        font-size: 24px;
+    }
+
+    .table-custom {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table-custom thead {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .table-custom th {
+        padding: 14px 16px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .table-custom th:first-child {
+        border-top-left-radius: 10px;
+    }
+
+    .table-custom th:last-child {
+        border-top-right-radius: 10px;
+    }
+
+    .table-custom tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table-custom tbody tr:hover {
+        background: #f8fafc;
+        transform: scale(1.01);
+    }
+
+    .table-custom td {
+        padding: 16px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .table-custom tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .btn-process {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-process:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 15px;
+        font-weight: 500;
+        margin: 0;
+    }
+</style>
+
+<div class="dashboard-header">
+    <h2>Laboratory Dashboard</h2>
+    <p>Welcome back! Here's what's happening in your lab today.</p>
 </div>
 
+<!-- Quick Actions Section -->
+<div class="quick-actions">
+    <h3>Quick Actions</h3>
+    <div class="actions-grid">
+        {% if current_user.role in ['Receptionist', 'Admin'] %}
+        <a href="{{ url_for('register_patient') }}" class="action-btn">
+            <span class="action-icon">➕</span>
+            <span class="action-text">Register Patient</span>
+        </a>
+        <a href="{{ url_for('payments') }}" class="action-btn">
+            <span class="action-icon">💳</span>
+            <span class="action-text">Record Payment</span>
+        </a>
+        {% endif %}
+
+        {% if current_user.role in ['Admin', 'Technician'] %}
+        <a href="{{ url_for('patient_history') }}" class="action-btn">
+            <span class="action-icon">📋</span>
+            <span class="action-text">Patient History</span>
+        </a>
+        {% endif %}
+
+        <a href="{{ url_for('inventory') }}" class="action-btn">
+            <span class="action-icon">📦</span>
+            <span class="action-text">View Inventory</span>
+        </a>
+
+        {% if current_user.role == 'Admin' %}
+        <a href="{{ url_for('manage_users') }}" class="action-btn">
+            <span class="action-icon">👥</span>
+            <span class="action-text">Manage Users</span>
+        </a>
+        <a href="{{ url_for('approve_results') }}" class="action-btn">
+            <span class="action-icon">✅</span>
+            <span class="action-text">Approve Results</span>
+        </a>
+        <a href="{{ url_for('inventory_logs') }}" class="action-btn">
+            <span class="action-icon">📝</span>
+            <span class="action-text">View Logs</span>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card warning">
+        <div class="stat-header">
+            <div class="stat-content">
+                <h3>Pending Tests</h3>
+                <div class="stat-value">{{ pending }}</div>
+            </div>
+            <div class="stat-icon">⏳</div>
+        </div>
+        <div class="stat-footer">
+            Tests awaiting processing
+        </div>
+    </div>
+
+    <div class="stat-card success">
+        <div class="stat-header">
+            <div class="stat-content">
+                <h3>Completed Tests</h3>
+                <div class="stat-value">{{ completed }}</div>
+            </div>
+            <div class="stat-icon">✅</div>
+        </div>
+        <div class="stat-footer">
+            Successfully processed
+        </div>
+    </div>
+</div>
+
+<!-- Low Reagent Alerts -->
 {% if low_stock %}
-<div class="alert alert-danger">
-    <strong>Low Stock Alert!!:</strong>
-    <ul>{% for item in low_stock %}<li>{{ item.item_name }} (Only {{ item.quantity }} left)</li>{% endfor %}</ul>
+<div class="alert-section" style="background-color: red;">
+    <div class="alert-custom">
+        <strong>Low Reagent Alerts!</strong>
+        <ul class="reagent-list">
+            {% for item in low_stock %}
+            <li class="reagent-item {% if item.quantity < 5 %}critical{% endif %}">
+                <span class="reagent-name">{{ item.item_name }}</span>
+                <div class="reagent-quantity">
+                    <div class="stock-progress">
+                        <div class="stock-progress-bar" data-quantity="{{ item.quantity }}"
+                            data-threshold="{{ item.low_stock_threshold }}"></div>
+                    </div>
+                    <span class="quantity-badge {% if item.quantity < 5 %}critical{% endif %}">
+                        {{ item.quantity }} left
+                    </span>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="alert-footer">
+            <a href="{{ url_for('inventory') }}" class="alert-link">Manage Inventory</a>
+        </div>
+    </div>
 </div>
 {% endif %}
 
-{% if current_user.role == 'Technician' %}
-    <h3>Tests Assigned to Queue</h3>
-    <table class="table">
-        <tr><th>Patient</th><th>Test</th><th>Action</th></tr>
-        {% for test in my_tests %}
-        <tr>
-            <td>{{ test.patient.name }}</td>
-            <td>{{ test.test_type }}</td>
-            <td><a href="{{ url_for('test_results', test_id=test.id) }}" class="btn btn-sm btn-primary">Process</a></td>
-        </tr>
+<!-- Recent Activity Section -->
+<div class="recent-activity">
+    <h3>Recent Activity</h3>
+    {% if recent_activities %}
+    <div class="activity-timeline">
+        {% for activity in recent_activities %}
+        <div class="activity-item">
+            <div class="activity-action">{{ activity.action }}</div>
+            <div class="activity-meta">
+                <span class="activity-user">{{ activity.user }}</span>
+                <span class="activity-time">{{ activity.timestamp.strftime('%b %d, %Y at %I:%M %p') }}</span>
+            </div>
+        </div>
         {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-activity">
+        <div class="empty-activity-icon">📭</div>
+        <p>No recent activity to display</p>
+    </div>
+    {% endif %}
+</div>
+
+
+<!-- Tests Queue (for Technicians) -->
+{% if current_user.role == 'Technician' %}
+<div class="table-section">
+    <h3>Tests Assigned to Queue</h3>
+    {% if my_tests %}
+    <table class="table-custom">
+        <thead>
+            <tr>
+                <th>Patient</th>
+                <th>Test Type</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for test in my_tests %}
+            <tr>
+                <td>{{ test.patient.name }}</td>
+                <td>{{ test.test_type }}</td>
+                <td>
+                    <a href="{{ url_for('test_results', test_id=test.id) }}" class="btn-process">
+                        Process Test
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <p>No tests in your queue at the moment</p>
+    </div>
+    {% endif %}
+</div>
 {% endif %}
+
+<script>
+    // Calculate progress bar widths dynamically to avoid CSS linting errors
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.stock-progress-bar').forEach(bar => {
+            const quantity = parseFloat(bar.dataset.quantity);
+            const threshold = parseFloat(bar.dataset.threshold);
+            const percentage = Math.min(Math.round((quantity / threshold) * 100), 100);
+            bar.style.width = percentage + '%';
+        });
+    });
+</script>
 {% endblock %}

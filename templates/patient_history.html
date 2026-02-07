@@ -1,105 +1,505 @@
 {% extends "layout.html" %}
 {% block content %}
+<style>
+    .history-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
 
-<div class="card">
-    <div class="card-header">
-        <h3>Patient History</h3>
+    .page-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        border-radius: 16px;
+        padding: 35px 40px;
+        margin-bottom: 35px;
+        color: white;
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: pulse 15s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1) rotate(0deg);
+        }
+
+        50% {
+            transform: scale(1.2) rotate(180deg);
+        }
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header h2 {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-header p {
+        font-size: 15px;
+        margin: 0;
+        opacity: 0.95;
+        font-weight: 400;
+    }
+
+    .search-section {
+        background: white;
+        border-radius: 16px;
+        padding: 25px 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .search-wrapper {
+        position: relative;
+        max-width: 500px;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+        color: #94a3b8;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 14px 18px 14px 50px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 500;
+        color: #334155;
+        background: #f8fafc;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .patient-card {
+        background: white;
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .patient-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .patient-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .patient-info {
+        flex: 1;
+    }
+
+    .patient-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 8px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .patient-id {
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .patient-meta {
+        display: flex;
+        gap: 25px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .meta-icon {
+        font-size: 16px;
+    }
+
+    .meta-value {
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .patient-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-expand {
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-expand:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-expand.collapsed::after {
+        content: '▼';
+        font-size: 10px;
+    }
+
+    .btn-expand:not(.collapsed)::after {
+        content: '▲';
+        font-size: 10px;
+    }
+
+    .tests-summary {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .test-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: white;
+    }
+
+    .test-badge.approved {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .test-badge.completed {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    }
+
+    .test-badge.pending {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .test-details {
+        margin-top: 20px;
+        padding: 25px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+    }
+
+    .test-details-header {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .test-item {
+        background: white;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .test-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .test-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .test-type {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .test-date {
+        font-size: 13px;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .test-result {
+        padding: 12px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border-left: 3px solid #3b82f6;
+        font-size: 14px;
+        color: #334155;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .no-result {
+        font-style: italic;
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .patient-header {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .patient-meta {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .patient-card {
+            padding: 20px;
+        }
+
+        .test-details {
+            padding: 18px;
+        }
+    }
+</style>
+
+<div class="history-container">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h2>
+                <span>📋</span>
+                Patient History
+            </h2>
+            <p>View complete patient records and test history</p>
+        </div>
     </div>
-    <div class="card-body">
-        <table class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Date Registered</th>
-                    <th>Patient Name</th>
-                    <th>Age</th>
-                    <th>Gender</th>
-                    <th>Contact</th>
-                    <th>Tests</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for patient in patients %}
-                <tr>
-                    <td>{{ patient.id }}</td>
-                    <td>
-                        {% if patient.tests %}
-                            {{ patient.tests[0].date_created.strftime('%Y-%m-%d') }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                    <td><strong>{{ patient.name }}</strong></td>
-                    <td>{{ patient.age }}</td>
-                    <td>{{ patient.gender }}</td>
-                    <td>{{ patient.contact }}</td>
-                    <td>
-                        {% for test in patient.tests %}
-                            <span class="badge 
-                                {% if test.status == 'Approved' %}bg-success
-                                {% elif test.status == 'Completed' %}bg-info
-                                {% elif test.status == 'Pending' %}bg-warning
-                                {% else %}bg-secondary{% endif %}">
-                                {{ test.test_type }} ({{ test.status }})
-                            </span>
-                        {% endfor %}
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#patient{{ patient.id }}">
-                            View Tests
-                        </button>
-                    </td>
-                </tr>
-                <tr class="collapse" id="patient{{ patient.id }}">
-                    <td colspan="8" style="background: #f8f9fa;">
-                        <div class="p-3">
-                            <h6>Test Details:</h6>
-                            {% if patient.tests %}
-                                <table class="table table-sm table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Test Type</th>
-                                            <th>Status</th>
-                                            <th>Date Created</th>
-                                            <th>Technician Comments/Results</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for test in patient.tests %}
-                                        <tr>
-                                            <td>{{ test.test_type }}</td>
-                                            <td>
-                                                <span class="badge 
-                                                    {% if test.status == 'Approved' %}bg-success
-                                                    {% elif test.status == 'Completed' %}bg-info
-                                                    {% elif test.status == 'Pending' %}bg-warning
-                                                    {% else %}bg-secondary{% endif %}">
-                                                    {{ test.status }}
-                                                </span>
-                                            </td>
-                                            <td>{{ test.date_created.strftime('%Y-%m-%d %H:%M') }}</td>
-                                            <td>
-                                                {% if test.result_data %}
-                                                    <div style="white-space: pre-wrap; max-width: 400px;">{{ test.result_data }}</div>
-                                                {% else %}
-                                                    <em class="text-muted">No result yet</em>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            {% else %}
-                                <p class="text-muted">No tests found for this patient.</p>
-                            {% endif %}
+
+    <!-- Search Section -->
+    <div class="search-section">
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchInput"
+                placeholder="Search by patient name, ID, or contact...">
+        </div>
+    </div>
+
+    <!-- Patient Cards -->
+    <div id="patientList">
+        {% if patients %}
+        {% for patient in patients %}
+        <div class="patient-card" data-patient-name="{{ patient.name.lower() }}" data-patient-id="{{ patient.id }}"
+            data-patient-contact="{{ patient.contact }}">
+            <div class="patient-header">
+                <div class="patient-info">
+                    <h3 class="patient-name">
+                        👤 {{ patient.name }}
+                        <span class="patient-id">#{{ patient.id }}</span>
+                    </h3>
+                    <div class="patient-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">🎂</span>
+                            <span class="meta-value">{{ patient.age }} years</span>
                         </div>
-                    </td>
-                </tr>
+                        <div class="meta-item">
+                            <span class="meta-icon">⚧</span>
+                            <span class="meta-value">{{ patient.gender }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">📱</span>
+                            <span class="meta-value">{{ patient.contact if patient.contact else 'N/A' }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">📅</span>
+                            <span class="meta-value">
+                                {% if patient.tests %}
+                                Registered: {{ patient.tests[0].date_created.strftime('%b %d, %Y') }}
+                                {% else %}
+                                No tests
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="patient-actions">
+                    <button class="btn-expand collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#patient{{ patient.id }}">
+                        View Tests
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tests Summary -->
+            {% if patient.tests %}
+            <div class="tests-summary">
+                {% for test in patient.tests %}
+                <span class="test-badge {{ test.status.lower() }}">
+                    {% if test.status == 'Approved' %}✓
+                    {% elif test.status == 'Completed' %}⏱
+                    {% elif test.status == 'Pending' %}⏳
+                    {% endif %}
+                    {{ test.test_type }}
+                </span>
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
+            {% endif %}
+
+            <!-- Expandable Test Details -->
+            <div class="collapse" id="patient{{ patient.id }}">
+                <div class="test-details">
+                    <div class="test-details-header">
+                        🧪 Test Details
+                    </div>
+                    {% if patient.tests %}
+                    {% for test in patient.tests %}
+                    <div class="test-item">
+                        <div class="test-item-header">
+                            <span class="test-type">{{ test.test_type }}</span>
+                            <span class="test-badge {{ test.status.lower() }}">
+                                {% if test.status == 'Approved' %}✓
+                                {% elif test.status == 'Completed' %}⏱
+                                {% elif test.status == 'Pending' %}⏳
+                                {% endif %}
+                                {{ test.status }}
+                            </span>
+                        </div>
+                        <div class="test-date">
+                            📅 {{ test.date_created.strftime('%b %d, %Y at %I:%M %p') }}
+                        </div>
+                        {% if test.result_data %}
+                        <div class="test-result">{{ test.result_data }}</div>
+                        {% else %}
+                        <div class="no-result">No results available yet</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="no-result">No tests found for this patient.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>No patient records found</p>
+        </div>
+        {% endif %}
     </div>
 </div>
+
+<script>
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const patientCards = document.querySelectorAll('.patient-card');
+
+        patientCards.forEach(card => {
+            const name = card.dataset.patientName;
+            const id = card.dataset.patientId;
+            const contact = card.dataset.patientContact;
+
+            if (name.includes(searchTerm) || id.includes(searchTerm) || contact.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    // Toggle button text on expand/collapse
+    document.querySelectorAll('.btn-expand').forEach(btn => {
+        const target = document.querySelector(btn.dataset.bsTarget);
+        if (target) {
+            target.addEventListener('shown.bs.collapse', function () {
+                btn.classList.remove('collapsed');
+            });
+            target.addEventListener('hidden.bs.collapse', function () {
+                btn.classList.add('collapsed');
+            });
+        }
+    });
+</script>
 
 {% endblock %}
