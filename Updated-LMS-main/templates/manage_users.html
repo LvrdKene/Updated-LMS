@@ -1,0 +1,328 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    .users-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        border-radius: 16px;
+        padding: 35px 40px;
+        margin-bottom: 35px;
+        color: white;
+        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: pulse 15s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1) rotate(0deg);
+        }
+
+        50% {
+            transform: scale(1.2) rotate(180deg);
+        }
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header h2 {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-header p {
+        font-size: 15px;
+        margin: 0;
+        opacity: 0.95;
+        font-weight: 400;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 16px;
+        padding: 0;
+        margin-bottom: 35px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .table-custom {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table-custom thead {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .table-custom th {
+        padding: 18px 24px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .table-custom tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table-custom tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .table-custom td {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 500;
+        vertical-align: middle;
+    }
+
+    .table-custom tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .user-profile-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .user-avatar-cell {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+        color: #4338ca;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 15px;
+    }
+
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .role-badge.admin {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .role-badge.technician {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .role-badge.receptionist {
+        background: #fce7f3;
+        color: #9f1239;
+    }
+
+    .password-form {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .password-input {
+        padding: 10px 14px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 14px;
+        width: 200px;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+        color: #334155;
+    }
+
+    .password-input:focus {
+        outline: none;
+        border-color: #4f46e5;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+    .btn-change {
+        padding: 10px 18px;
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-change:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 15px;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 28px 30px;
+        }
+
+        .password-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .password-input {
+            width: 100%;
+        }
+
+        .btn-change {
+            justify-content: center;
+        }
+
+        .table-custom th,
+        .table-custom td {
+            padding: 16px;
+        }
+    }
+</style>
+
+<div class="users-container">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h2>
+                <span>👥</span>
+                Manage Users
+            </h2>
+            <p>Administer staff accounts and security settings</p>
+        </div>
+    </div>
+
+    <div class="section-card">
+        {% if users %}
+        <div class="table-responsive">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Staff Member</th>
+                        <th>Role & Access</th>
+                        <th>Security Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>
+                            <div class="user-profile-cell">
+                                <div class="user-avatar-cell">
+                                    {{ user.username[:1].upper() }}
+                                </div>
+                                <span class="user-name">{{ user.username }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="role-badge {{ user.role.lower() }}">
+                                {% if user.role == 'Admin' %}
+                                <span>🛡️</span>
+                                {% elif user.role == 'Technician' %}
+                                <span>🔬</span>
+                                {% else %}
+                                <span>👋</span>
+                                {% endif %}
+                                {{ user.role }}
+                            </span>
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('change_password', user_id=user.id) }}"
+                                class="password-form">
+                                <input type="password" name="new_password" class="password-input"
+                                    placeholder="New password" required minlength="4" autocomplete="new-password">
+                            <form method="POST" action="{{ url_for('change_password', user_id=user.id) }}"
+                                class="password-form">
+                                <input type="password" name="confirm_password" class="password-input"
+                                    placeholder="Confirm password" required minlength="4" autocomplete="new-password">
+                                <button type="submit" class="btn-change">
+                                    <span>🔒</span> Update Password
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">👥</div>
+            <p>No users found in the system.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

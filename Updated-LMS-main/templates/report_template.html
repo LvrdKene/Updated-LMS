@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1 style="color:#2c3e50;">Laboratory Result Report</h1>
+    <hr>
+    <p><strong>Patient Name:</strong> {{ test.patient.name }}</p>
+    <p><strong>Age/Gender:</strong> {{ test.patient.age }} / {{ test.patient.gender }}</p>
+    <p><strong>Date:</strong> {{ test.date_created.strftime('%Y-%m-%d') }}</p>
+    
+    <h3>Test: {{ test.test_type }}</h3>
+    <div style="border:1px solid #ddd; padding:15px; background:#f9f9f9;">
+        <h4>Findings:</h4>
+        <p>{{ test.result_data }}</p>
+    </div>
+    <br><br>
+    <p><em>Verified by Lab Admin</em></p>
+</body>
+</html>

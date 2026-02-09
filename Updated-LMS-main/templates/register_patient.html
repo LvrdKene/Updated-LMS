@@ -1,0 +1,473 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    .registration-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 35px 40px;
+        margin-bottom: 35px;
+        color: white;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: pulse 15s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1) rotate(0deg);
+        }
+
+        50% {
+            transform: scale(1.2) rotate(180deg);
+        }
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header h2 {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-header p {
+        font-size: 15px;
+        margin: 0;
+        opacity: 0.95;
+        font-weight: 400;
+    }
+
+    .registration-form {
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .form-section {
+        margin-bottom: 35px;
+    }
+
+    .form-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-icon {
+        font-size: 22px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .form-group label .required {
+        color: #dc2626;
+        margin-left: 4px;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+        color: #94a3b8;
+        transition: all 0.3s ease;
+        pointer-events: none;
+    }
+
+    .form-control-custom {
+        width: 100%;
+        padding: 14px 18px 14px 48px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 500;
+        color: #334155;
+        background: #f8fafc;
+        transition: all 0.3s ease;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .form-control-custom:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+    }
+
+    /* .form-control-custom:focus+.input-icon {
+        color: #667eea;
+        transform: translateY(-50%) scale(1.1);
+    } */
+
+    select.form-control-custom {
+        cursor: pointer;
+        appearance: none;
+        background-color: #f8fafc;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        padding-right: 45px;
+    }
+
+    select.form-control-custom:focus {
+        background-color: white;
+        /* background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E"); */
+    }
+
+    select.form-control-custom optgroup {
+        font-weight: 700;
+        color: #1e293b;
+        background: #f8fafc;
+        padding: 8px;
+    }
+
+    select.form-control-custom option {
+        padding: 10px;
+        font-weight: 500;
+        color: #334155;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 35px;
+        padding-top: 30px;
+        border-top: 2px solid #f1f5f9;
+    }
+
+    .btn-submit {
+        flex: 1;
+        padding: 16px 32px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-submit::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-submit:hover::before {
+        left: 100%;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-submit:active {
+        transform: translateY(-1px);
+    }
+
+    .btn-submit-icon {
+        font-size: 20px;
+    }
+
+    .btn-cancel {
+        padding: 16px 32px;
+        background: #f1f5f9;
+        color: #64748b;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-cancel:hover {
+        background: #e2e8f0;
+        color: #475569;
+        transform: translateY(-2px);
+    }
+
+    .info-box {
+        background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
+        border-left: 4px solid #3b82f6;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: start;
+        gap: 12px;
+    }
+
+    .info-icon {
+        font-size: 20px;
+        color: #2563eb;
+        margin-top: 2px;
+    }
+
+    .info-text {
+        font-size: 14px;
+        color: #1e40af;
+        font-weight: 500;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+        .registration-form {
+            padding: 30px 25px;
+        }
+
+        .page-header {
+            padding: 28px 30px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-cancel {
+            order: 2;
+        }
+    }
+</style>
+
+<div class="registration-container">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h2>
+                <span>👤</span>
+                Patient Registration
+            </h2>
+            <p>Register a new patient and create their test sample in one step</p>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <div class="info-icon">ℹ️</div>
+        <div class="info-text">
+            Complete all required fields marked with <span style="color: #dc2626;">*</span> to register the patient and
+            automatically create their test sample.
+        </div>
+    </div>
+
+    <form method="POST" class="registration-form">
+        <!-- Patient Information Section -->
+        <div class="form-section">
+            <div class="section-title">
+                <span class="section-icon">📋</span>
+                Patient Information
+            </div>
+
+            <div class="form-group">
+                <label>
+                    Full Name
+                    <span class="required">*</span>
+                </label>
+                <div class="input-wrapper">
+                    <input type="text" name="name" class="form-control-custom" placeholder="Enter patient's full name"
+                        required autofocus>
+                    <span class="input-icon">👤</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>
+                        Age
+                        <span class="required">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="number" name="age" class="form-control-custom" placeholder="Enter age" min="0"
+                            max="150" required>
+                        <span class="input-icon">🎂</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Gender
+                        <span class="required">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <select name="gender" class="form-control-custom" required>
+                            <option value="" disabled selected>Select gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span class="input-icon">⚧</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Contact Number</label>
+                <div class="input-wrapper">
+                    <input type="tel" name="contact" class="form-control-custom"
+                        placeholder="Enter phone number (optional)">
+                    <span class="input-icon">📱</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Information Section -->
+        <div class="form-section">
+            <div class="section-title">
+                <span class="section-icon">🧪</span>
+                Test Information
+            </div>
+
+            <div class="form-group">
+                <label>
+                    Test Required
+                    <span class="required">*</span>
+                </label>
+                <div class="input-wrapper">
+                    <select name="test_type" class="form-control-custom" required>
+                        <option value="" selected disabled>-- Select a Test --</option>
+
+                        <optgroup label="🩸 Hematology">
+                            <option value="Full Blood Count (FBC/CBC)">Full Blood Count (FBC/CBC)</option>
+                            <option value="Packed Cell Volume (PCV)">Packed Cell Volume (PCV)</option>
+                            <option value="Blood Group & Rh Typing">Blood Group & Rh Typing</option>
+                            <option value="ESR">ESR (Sedimentation Rate)</option>
+                            <option value="Genotype (Hb Electrophoresis)">Genotype (Hb Electrophoresis)</option>
+                        </optgroup>
+
+                        <optgroup label="⚗️ Chemistry / Metabolism">
+                            <option value="Fasting Blood Sugar (FBS)">Fasting Blood Sugar (FBS)</option>
+                            <option value="Liver Function Test (LFT)">Liver Function Test (LFT)</option>
+                            <option value="Kidney Function Test (E/U/Cr)">Kidney Function Test (Urea/Creatinine)
+                            </option>
+                            <option value="Lipid Profile (Cholesterol)">Lipid Profile (Cholesterol)</option>
+                            <option value="HbA1c (Diabetes Monitoring)">HbA1c</option>
+                        </optgroup>
+
+                        <optgroup label="🦠 Microbiology / Serology">
+                            <option value="Malaria Parasite (MP)">Malaria Parasite (MP)</option>
+                            <option value="Widal Test (Typhoid)">Widal Test (Typhoid)</option>
+                            <option value="Urinalysis (Dipstick & Microscopy)">Urinalysis</option>
+                            <option value="Hepatitis B (HBsAg)">Hepatitis B (HBsAg)</option>
+                            <option value="HIV 1 & 2 Screen">HIV 1 & 2 Screen</option>
+                            <option value="Stool Analysis">Stool Analysis</option>
+                        </optgroup>
+                    </select>
+                    <span class="input-icon">🧪</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">
+                <span class="btn-submit-icon">✓</span>
+                Register Patient & Create Sample
+            </button>
+            <a href="{{ url_for('dashboard') }}" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Add smooth focus animations
+    document.querySelectorAll('.form-control-custom').forEach(input => {
+        input.addEventListener('focus', function () {
+            this.parentElement.parentElement.querySelector('label').style.color = '#667eea';
+        });
+
+        input.addEventListener('blur', function () {
+            this.parentElement.parentElement.querySelector('label').style.color = '#475569';
+        });
+    });
+
+    // Form validation feedback
+    const form = document.querySelector('.registration-form');
+    form.addEventListener('submit', function (e) {
+        const submitBtn = this.querySelector('.btn-submit');
+        submitBtn.innerHTML = '<span>⏳</span> Registering...';
+        submitBtn.style.pointerEvents = 'none';
+    });
+</script>
+{% endblock %}

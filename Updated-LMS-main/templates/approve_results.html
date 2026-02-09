@@ -1,0 +1,444 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    .approvals-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 16px;
+        padding: 35px 40px;
+        margin-bottom: 35px;
+        color: white;
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: pulse 15s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1) rotate(0deg);
+        }
+
+        50% {
+            transform: scale(1.2) rotate(180deg);
+        }
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header h2 {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-header p {
+        font-size: 15px;
+        margin: 0;
+        opacity: 0.95;
+        font-weight: 400;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 16px;
+        padding: 0;
+        margin-bottom: 35px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .section-header {
+        padding: 24px 30px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: white;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .section-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: white;
+    }
+
+    .section-icon.pending {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .section-icon.approved {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .section-title h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .count-badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .count-badge.pending {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .count-badge.approved {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .table-custom {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table-custom thead {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .table-custom th {
+        padding: 18px 24px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .table-custom tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table-custom tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .table-custom td {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 500;
+        vertical-align: middle;
+    }
+
+    .table-custom tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .patient-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .patient-name {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 15px;
+    }
+
+    .test-type {
+        font-size: 13px;
+        color: #64748b;
+        margin-top: 4px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .result-preview {
+        max-width: 400px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+        color: #475569;
+        background: #f8fafc;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        white-space: pre-wrap;
+    }
+
+    .btn-approve {
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-approve:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        color: white;
+    }
+
+    .btn-download {
+        padding: 10px 16px;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-download:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        color: white;
+    }
+    .btn-redo {
+        padding: 10px 18px;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 15px;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .date-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: #f1f5f9;
+        border-radius: 8px;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    @media (max-width: 992px) {
+        .result-preview {
+            max-width: 300px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 28px 30px;
+        }
+
+        .result-preview {
+            display: none;
+        }
+
+        .table-custom th,
+        .table-custom td {
+            padding: 16px;
+        }
+    }
+</style>
+
+<div class="approvals-container">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h2>
+                <span>✅</span>
+                Results Approval
+            </h2>
+            <p>Review technician results and finalize patient reports</p>
+        </div>
+    </div>
+
+    <!-- Pending Reviews Section -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <div class="section-icon pending">⏳</div>
+                <h3>Pending Review</h3>
+            </div>
+            <span class="count-badge pending">{{ tests|length }} Pending</span>
+        </div>
+
+        {% if tests %}
+        <div class="table-responsive">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Patient Details</th>
+                        <th>Technician Results</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for test in tests %}
+                    <tr>
+                        <td>
+                            <div class="patient-info">
+                                <span class="patient-name">{{ test.patient.name }}</span>
+                                <span class="test-type">
+                                    <span>🔬</span> {{ test.test_type }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="result-preview">{{ test.result_data }}</div>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('approve', test_id=test.id) }}" class="btn-approve">
+                                <span>✓</span> Approve
+                            </a>
+                            <a href="{{ url_for('request_redo', test_id=test.id) }}" class="btn-redo" style="margin-left:8px;">
+                                <span>↺</span> Request Redo
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">✨</div>
+            <p>No pending results to review.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Approved History Section -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <div class="section-icon approved">📋</div>
+                <h3>Approved Reports</h3>
+            </div>
+            <span class="count-badge approved">Ready to Print</span>
+        </div>
+
+        {% if approved_tests %}
+        <div class="table-responsive">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Patient Details</th>
+                        <th>Approval Date</th>
+                        <th>Report</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for test in approved_tests %}
+                    <tr>
+                        <td>
+                            <div class="patient-info">
+                                <span class="patient-name">{{ test.patient.name }}</span>
+                                <span class="test-type">
+                                    <span>🔬</span> {{ test.test_type }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="date-badge">
+                                <span>📅</span>
+                                {{ test.date_created.strftime('%Y-%m-%d %H:%M') }}
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('generate_report', test_id=test.id) }}" class="btn-download">
+                                <span>📄</span> PDF
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📂</div>
+            <p>No approved reports available yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

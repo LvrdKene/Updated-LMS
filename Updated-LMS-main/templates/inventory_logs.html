@@ -1,0 +1,350 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    .logs-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        border-radius: 16px;
+        padding: 35px 40px;
+        margin-bottom: 35px;
+        color: white;
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: pulse 15s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1) rotate(0deg);
+        }
+
+        50% {
+            transform: scale(1.2) rotate(180deg);
+        }
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header h2 {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-header p {
+        font-size: 15px;
+        margin: 0;
+        opacity: 0.95;
+        font-weight: 400;
+    }
+
+    .logs-card {
+        background: white;
+        border-radius: 16px;
+        padding: 0;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .table-custom {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table-custom thead {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .table-custom th {
+        padding: 18px 24px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .table-custom tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table-custom tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .table-custom td {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 500;
+        vertical-align: middle;
+    }
+
+    .table-custom tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .log-date {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .date-main {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 14px;
+    }
+
+    .date-sub {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 4px;
+    }
+
+    .action-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: white;
+    }
+
+    .action-badge.added {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .action-badge.reduced {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .action-badge.used {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    }
+
+    .action-badge.deleted {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .log-user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .log-user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .qty-change {
+        font-weight: 700;
+        font-size: 15px;
+    }
+
+    .qty-change.positive {
+        color: #10b981;
+    }
+
+    .qty-change.negative {
+        color: #ef4444;
+    }
+
+    .item-name {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 15px;
+    }
+
+    .test-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #6366f1;
+        font-weight: 600;
+        text-decoration: none;
+        padding: 6px 12px;
+        background: #eef2ff;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .test-link:hover {
+        background: #e0e7ff;
+        transform: translateY(-1px);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 28px 30px;
+        }
+
+        .table-custom th,
+        .table-custom td {
+            padding: 16px;
+        }
+
+        .action-badge {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+    }
+</style>
+
+<div class="logs-container">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h2>
+                <span>📜</span>
+                Inventory Logs
+            </h2>
+            <p>Track history of all inventory movements and adjustments</p>
+        </div>
+    </div>
+
+    <div class="logs-card">
+        {% if logs %}
+        <div class="table-responsive">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Item Details</th>
+                        <th>Action</th>
+                        <th>Quantity Change</th>
+                        <th>Performed By</th>
+                        <th>Reference</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>
+                            <div class="log-date">
+                                <span class="date-main">{{ log.timestamp.strftime('%b %d, %Y') }}</span>
+                                <span class="date-sub">{{ log.timestamp.strftime('%I:%M %p') }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="item-name">{{ log.item_name }}</div>
+                        </td>
+                        <td>
+                            {% if log.action == 'added' or 'created' in log.action %}
+                            <span class="action-badge added">
+                                <span>📥</span> Added Stock
+                            </span>
+                            {% elif log.action == 'reduced' %}
+                            <span class="action-badge reduced">
+                                <span>📉</span> Adjusted Down
+                            </span>
+                            {% elif 'used' in log.action %}
+                            <span class="action-badge used">
+                                <span>🧪</span> Used in Test
+                            </span>
+                            {% elif 'deleted' in log.action %}
+                            <span class="action-badge deleted">
+                                <span>🗑️</span> Deleted Item
+                            </span>
+                            {% else %}
+                            <span class="action-badge used">
+                                <span>📝</span> {{ log.action|title }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if log.action == 'added' or 'created' in log.action %}
+                            <span class="qty-change positive">+{{ log.quantity }}</span>
+                            {% else %}
+                            <span class="qty-change negative">-{{ log.quantity }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="log-user-info">
+                                <div class="log-user-avatar">
+                                    {{ log.user[:1].upper() if log.user else '?' }}
+                                </div>
+                                <span>{{ log.user }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if log.test_id %}
+                            <a href="{{ url_for('test_results', test_id=log.test_id) }}" class="test-link">
+                                <span>🔗</span> Test #{{ log.test_id }}
+                            </a>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <p>No inventory logs recorded yet</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

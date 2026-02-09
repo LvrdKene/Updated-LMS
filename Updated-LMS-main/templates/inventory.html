@@ -1,0 +1,575 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    .inventory-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        border-radius: 16px;
+        padding: 35px 40px;
+        margin-bottom: 35px;
+        color: white;
+        box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: pulse 15s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1) rotate(0deg);
+        }
+
+        50% {
+            transform: scale(1.2) rotate(180deg);
+        }
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header h2 {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-header p {
+        font-size: 15px;
+        margin: 0;
+        opacity: 0.95;
+        font-weight: 400;
+    }
+
+    .alert-custom {
+        padding: 16px 24px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #065f46;
+        border: 1px solid #6ee7b7;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+    }
+
+    .add-item-section {
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 25px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .section-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 20px;
+        align-items: end;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 10px;
+    }
+
+    .form-control-custom {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 500;
+        color: #334155;
+        background: #f8fafc;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-custom:focus {
+        outline: none;
+        border-color: #8b5cf6;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .btn-create {
+        width: 100%;
+        padding: 14px 24px;
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .inventory-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 24px;
+    }
+
+    .inventory-card {
+        background: white;
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .inventory-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .item-name {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 8px 0;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: white;
+    }
+
+    .status-badge.low {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        animation: pulse-badge 2s ease-in-out infinite;
+    }
+
+    .status-badge.medium {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .status-badge.high {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    @keyframes pulse-badge {
+
+        0%,
+        100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+
+        50% {
+            box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+        }
+    }
+
+    .stock-info {
+        margin-bottom: 20px;
+    }
+
+    .stock-quantity {
+        font-size: 32px;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 8px;
+    }
+
+    .stock-label {
+        font-size: 13px;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .stock-progress {
+        width: 100%;
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .stock-progress-bar {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+
+    .stock-progress-bar.low {
+        background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .stock-progress-bar.medium {
+        background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .stock-progress-bar.high {
+        background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    }
+
+    .stock-controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .control-group {
+        flex: 1;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .qty-input {
+        width: 60px;
+        padding: 8px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .qty-input:focus {
+        outline: none;
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    .btn-stock {
+        flex: 1;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn-add {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-reduce {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-reduce:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-delete {
+        width: 100%;
+        padding: 10px 16px;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    @media (max-width: 992px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .inventory-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="inventory-container">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h2>
+                <span>📦</span>
+                Inventory Management
+            </h2>
+            <p>Track and manage laboratory supplies and reagents</p>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    {% if 'added' in message.lower() or 'created' in message.lower() or 'reduced' in message.lower() %}
+    <div class="alert-custom alert-success">
+        <span>✓</span>
+        {{ message }}
+    </div>
+    {% else %}
+    <div class="alert-custom alert-danger">
+        <span>⚠</span>
+        {{ message }}
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <!-- Add New Item Section -->
+    <div class="add-item-section">
+        <div class="section-header">
+            <div class="section-icon">➕</div>
+            <h3 class="section-title">Add New Inventory Item</h3>
+        </div>
+
+        <form method="POST">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Item Name</label>
+                    <input type="text" name="new_item_name" class="form-control-custom"
+                        placeholder="e.g., Syringes, Reagent Kit, Test Tubes" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Initial Quantity</label>
+                    <input type="number" name="initial_qty" class="form-control-custom" placeholder="0" required
+                        min="0">
+                </div>
+
+                <div class="form-group">
+                    <label>Low Stock Alert</label>
+                    <input type="number" name="threshold" class="form-control-custom" value="10" required min="0">
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn-create">
+                        <span>+</span>
+                        Create Item
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Inventory Items Grid -->
+    {% if items %}
+    <div class="inventory-grid">
+        {% for item in items %}
+        <div class="inventory-card">
+            <div class="card-header">
+                <div>
+                    <h3 class="item-name">{{ item.item_name }}</h3>
+                    {% if item.quantity <= item.low_stock_threshold %} <span class="status-badge low">🔴 Low
+                        Stock</span>
+                        {% elif item.quantity <= item.low_stock_threshold * 2 %} <span class="status-badge medium">🟡
+                            Medium</span>
+                            {% else %}
+                            <span class="status-badge high">🟢 In Stock</span>
+                            {% endif %}
+                </div>
+            </div>
+
+            <div class="stock-info">
+                <div class="stock-quantity">{{ item.quantity }}</div>
+                <div class="stock-label">Units Available</div>
+            </div>
+
+            <div class="stock-progress">
+                <div class="stock-progress-bar {% if item.quantity <= item.low_stock_threshold %}low{% elif item.quantity <= item.low_stock_threshold * 2 %}medium{% else %}high{% endif %}"
+                    data-quantity="{{ item.quantity }}" data-threshold="{{ item.low_stock_threshold }}"></div>
+            </div>
+
+            <div class="stock-controls">
+                <form method="POST" class="control-group">
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <input type="hidden" name="action" value="add">
+                    <input type="number" name="qty" class="qty-input" value="1" min="1" required>
+                    <button type="submit" class="btn-stock btn-add">
+                        <span>+</span>
+                        Add
+                    </button>
+                </form>
+
+                <form method="POST" class="control-group">
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <input type="hidden" name="action" value="reduce">
+                    <input type="number" name="qty" class="qty-input" value="1" min="1" max="{{ item.quantity }}"
+                        required>
+                    <button type="submit" class="btn-stock btn-reduce">
+                        <span>−</span>
+                        Reduce
+                    </button>
+                </form>
+            </div>
+
+            <form method="POST" onsubmit="return confirm('Are you sure you want to delete {{ item.item_name }}?');">
+                <input type="hidden" name="item_id" value="{{ item.id }}">
+                <input type="hidden" name="action" value="delete">
+                <button type="submit" class="btn-delete">
+                    <span>🗑️</span>
+                    Delete Item
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📦</div>
+        <p>No inventory items found. Add one above to get started.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Calculate progress bar widths dynamically
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.stock-progress-bar').forEach(bar => {
+            const quantity = parseFloat(bar.dataset.quantity);
+            const threshold = parseFloat(bar.dataset.threshold);
+            const maxDisplay = threshold * 3; // Show full bar at 3x threshold
+            const percentage = Math.min(Math.round((quantity / maxDisplay) * 100), 100);
+            bar.style.width = percentage + '%';
+        });
+    });
+</script>
+
+{% endblock %}
