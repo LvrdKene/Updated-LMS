@@ -287,6 +287,28 @@
         box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
     }
 
+    .btn-receipt {
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-receipt:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+    }
+
     .empty-state {
         text-align: center;
         padding: 50px 20px;
@@ -485,6 +507,7 @@
                     <th>Payment Method</th>
                     <th>Date Paid</th>
                     <th>Confirmed By</th>
+                    <th>Receipt</th>
                 </tr>
             </thead>
             <tbody>
@@ -505,6 +528,12 @@
                     <td>{{ payment.date_confirmed.strftime('%b %d, %Y at %I:%M %p') if payment.date_confirmed else '-'
                         }}</td>
                     <td>{{ payment.confirmed_by if payment.confirmed_by else '-' }}</td>
+                    <td>
+                        <a class="btn-receipt"
+                            href="{{ url_for('payment_receipt', payment_id=payment.id) }}">
+                            Print Receipt
+                        </a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

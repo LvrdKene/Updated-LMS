@@ -209,6 +209,57 @@
         box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
     }
 
+    .btn-delete {
+        padding: 10px 16px;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-delete:hover {
+        background: #dc2626;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 8px;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 14px;
+        background: #f8fafc;
+        color: #334155;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #4f46e5;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+    .section-body {
+        padding: 24px 28px;
+    }
     .empty-state {
         text-align: center;
         padding: 60px 20px;
@@ -263,6 +314,51 @@
         </div>
     </div>
 
+    {% if admin_user %}
+    <div class="section-card">
+        <div class="section-body">
+            <div class="user-profile-cell">
+                <div class="user-avatar-cell">{{ admin_user.username[:1].upper() }}</div>
+                <div>
+                    <div class="user-name">{{ admin_user.username }}</div>
+                    <span class="role-badge admin">Admin Account</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="section-card">
+        <div class="section-body">
+            <h3 class="user-name" style="margin-bottom: 16px;">Create New User</h3>
+            <form method="POST" action="{{ url_for('manage_users') }}">
+                <input type="hidden" name="action" value="create">
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label" for="username">Username</label>
+                        <input id="username" name="username" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="form-label" for="password">Password</label>
+                        <input id="password" name="password" type="password" class="form-input" minlength="4"
+                            autocomplete="new-password" required>
+                    </div>
+                    <div>
+                        <label class="form-label" for="role">Role</label>
+                        <select id="role" name="role" class="form-input" required>
+                            <option value="Receptionist">Receptionist</option>
+                            <option value="Technician">Technician</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 16px;">
+                    <button type="submit" class="btn-change">Create User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="section-card">
         {% if users %}
         <div class="table-responsive">
@@ -302,13 +398,16 @@
                                 class="password-form">
                                 <input type="password" name="new_password" class="password-input"
                                     placeholder="New password" required minlength="4" autocomplete="new-password">
-                            <form method="POST" action="{{ url_for('change_password', user_id=user.id) }}"
-                                class="password-form">
                                 <input type="password" name="confirm_password" class="password-input"
                                     placeholder="Confirm password" required minlength="4" autocomplete="new-password">
                                 <button type="submit" class="btn-change">
                                     <span>🔒</span> Update Password
                                 </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('manage_users') }}">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <button type="submit" class="btn-delete">Delete</button>
                             </form>
                         </td>
                     </tr>

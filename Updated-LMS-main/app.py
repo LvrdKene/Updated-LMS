@@ -547,6 +547,74 @@ def payments():
                           paid_payments=paid_payments,
                           patients=patients)
 
+@app.route('/payment_receipt/<int:payment_id>')
+@login_required
+def payment_receipt(payment_id):
+    if current_user.role not in ['Receptionist', 'Admin']:
+        return "Unauthorized", 403
+
+    payment = Payment.query.get_or_404(payment_id)
+    if payment.status != 'Paid':
+        return "Receipt available only for paid payments.", 400
+
+    test = Test.query.get(payment.test_id) if payment.test_id else None
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        'ReceiptTitle',
+        parent=styles['Heading1'],
+        fontSize=22,
+        textColor='#1f2937',
+        spaceAfter=24,
+        alignment=TA_CENTER
+    )
+
+    label_style = ParagraphStyle(
+        'ReceiptLabel',
+        parent=styles['Normal'],
+        fontSize=11,
+        textColor='#111827',
+        spaceAfter=6,
+        alignment=TA_LEFT
+    )
+
+    story = []
+    story.append(Paragraph("Payment Receipt", title_style))
+    story.append(Spacer(1, 0.2*inch))
+
+    story.append(Paragraph(f"<b>Receipt ID:</b> #{payment.id}", label_style))
+    story.append(Paragraph(f"<b>Patient:</b> {payment.patient.name}", label_style))
+    story.append(Paragraph(f"<b>Amount:</b> ₦{payment.amount:.2f}", label_style))
+    story.append(Paragraph(f"<b>Payment Method:</b> {payment.payment_method}", label_style))
+    story.append(Paragraph(
+        f"<b>Date Paid:</b> {payment.date_confirmed.strftime('%Y-%m-%d %H:%M') if payment.date_confirmed else 'N/A'}",
+        label_style
+    ))
+    story.append(Paragraph(f"<b>Confirmed By:</b> {payment.confirmed_by or 'N/A'}", label_style))
+
+    if test:
+        story.append(Spacer(1, 0.1*inch))
+        story.append(Paragraph(f"<b>Test ID:</b> {test.id}", label_style))
+        story.append(Paragraph(f"<b>Test Type:</b> {test.test_type}", label_style))
+        story.append(Paragraph(f"<b>Test Status:</b> {test.status}", label_style))
+
+    story.append(Spacer(1, 0.3*inch))
+    story.append(Paragraph("_" * 50, styles['Normal']))
+    story.append(Paragraph("Thank you for your payment.", styles['Italic']))
+
+    doc.build(story)
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=f'Payment_Receipt_{payment.id}.pdf'
+    )
+
 @app.route('/report/<int:test_id>')
 @login_required
 def generate_report(test_id):
