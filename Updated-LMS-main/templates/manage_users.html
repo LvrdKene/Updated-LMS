@@ -314,16 +314,36 @@
         </div>
     </div>
 
-    {% if admin_user %}
+    {% if admins %}
     <div class="section-card">
         <div class="section-body">
-            <div class="user-profile-cell">
-                <div class="user-avatar-cell">{{ admin_user.username[:1].upper() }}</div>
-                <div>
-                    <div class="user-name">{{ admin_user.username }}</div>
-                    <span class="role-badge admin">Admin Account</span>
+            <h3 class="user-name" style="margin-bottom: 16px;">Admin Accounts</h3>
+            {% if current_user.role == 'Admin' %}
+            <form method="POST" action="{{ url_for('change_own_password') }}" class="password-form" style="margin-bottom: 18px;">
+                <input type="password" name="current_password" class="password-input" placeholder="Current password" required minlength="4" autocomplete="current-password">
+                <input type="password" name="new_password" class="password-input" placeholder="New password" required minlength="4" autocomplete="new-password">
+                <input type="password" name="confirm_password" class="password-input" placeholder="Confirm new password" required minlength="4" autocomplete="new-password">
+                <button type="submit" class="btn-change">Change My Password</button>
+            </form>
+            {% endif %}
+            {% for admin in admins %}
+            <div class="user-profile-cell" style="margin-bottom: 12px; justify-content: space-between;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div class="user-avatar-cell">{{ admin.username[:1].upper() }}</div>
+                    <div>
+                        <div class="user-name">{{ admin.username }}</div>
+                        <span class="role-badge admin">Admin Account</span>
+                    </div>
                 </div>
+                {% if admin.id != current_user.id %}
+                <form method="POST" action="{{ url_for('manage_users') }}">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="user_id" value="{{ admin.id }}">
+                    <button type="submit" class="btn-delete">Delete</button>
+                </form>
+                {% endif %}
             </div>
+            {% endfor %}
         </div>
     </div>
     {% endif %}
