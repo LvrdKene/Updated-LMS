@@ -44,6 +44,7 @@ class Test(db.Model):
     test_type = db.Column(db.String(100), nullable=False) # e.g., 'Malaria', 'FBC'
     status = db.Column(db.String(50), default='Pending') # Pending, Processing, Completed, Approved
     result_data = db.Column(db.Text, nullable=True)
+    doctor_remark = db.Column(db.Text, nullable=True)
     technician_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -151,7 +152,11 @@ def tests_by_status(status):
         return "Not Found", 404
 
     desired = allowed[key]
-    tests = Test.query.filter_by(status=desired).order_by(Test.date_created.desc()).all()
+    if desired == 'Pending':
+        tests = Test.query.filter(Test.status.in_(['Pending', 'Redo Requested'])) \
+            .order_by(Test.date_created.desc()).all()
+    else:
+        tests = Test.query.filter_by(status=desired).order_by(Test.date_created.desc()).all()
 
     # Attach technician username for display
     for t in tests:
@@ -169,7 +174,13 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        # Check login attempts
+        user = User.query.filter_by(username=username).first()
+
+        if not user:
+            flash('Wrong username or password.')
+            return render_template('login.html')
+
+        # Check login attempts for existing user
         attempt_record = LoginAttempt.query.filter_by(username=username).first()
         
         if attempt_record:
@@ -185,9 +196,7 @@ def login():
                 attempt_record.locked_until = None
                 db.session.commit()
         
-        user = User.query.filter_by(username=username).first()
-        
-        if user and user.password == password:
+        if user.password == password:
             # Successful login - reset attempts
             if attempt_record:
                 db.session.delete(attempt_record)
@@ -197,7 +206,7 @@ def login():
             log_action('Logged in')
             return redirect(url_for('dashboard'))
         else:
-            # Failed login - increment attempts
+            # Failed login - increment attempts for existing user
             if not attempt_record:
                 attempt_record = LoginAttempt(username=username, failed_attempts=1)
                 db.session.add(attempt_record)
@@ -255,6 +264,9 @@ def register_patient():
 @login_required
 def test_results(test_id):
     test = Test.query.get_or_404(test_id)
+
+    if current_user.role not in ['Technician', 'Admin']:
+        return "Unauthorized", 403
     
     if request.method == 'POST' and current_user.role in ['Technician', 'Admin']:
         test.result_data = request.form['result']
@@ -297,11 +309,14 @@ def approve_results():
     approved_tests = Test.query.filter_by(status='Approved').all()
     return render_template('approve_results.html', tests=completed_tests, approved_tests=approved_tests)
 
-@app.route('/approve/<int:test_id>')
+@app.route('/approve/<int:test_id>', methods=['POST'])
 @login_required
 def approve(test_id):
     if current_user.role != 'Admin': return "Unauthorized", 403
     test = Test.query.get_or_404(test_id)
+    remark = request.form.get('doctor_remark', '').strip()
+    if remark:
+        test.doctor_remark = remark
     test.status = 'Approved'
     db.session.commit()
     return redirect(url_for('approve_results'))
@@ -431,23 +446,36 @@ def manage_users():
         elif action == 'delete':
             user_id = request.form.get('user_id')
             user = User.query.get(user_id)
-            if user and user.role != 'Admin':  # Prevent deleting admin
+            if not user:
+                flash('User not found!')
+            elif user.role == 'Admin':
+                if user.id == current_user.id:
+                    flash('You cannot delete your own admin account.')
+                else:
+                    admin_count = User.query.filter_by(role='Admin').count()
+                    if admin_count <= 1:
+                        flash('Cannot delete the last admin account!')
+                    else:
+                        username = user.username
+                        db.session.delete(user)
+                        db.session.commit()
+                        log_action(f"Deleted user: {username}")
+                        flash(f'User {username} deleted successfully')
+            else:
                 username = user.username
                 db.session.delete(user)
                 db.session.commit()
                 log_action(f"Deleted user: {username}")
                 flash(f'User {username} deleted successfully')
-            else:
-                flash('Cannot delete admin account!')
     
     # Get all users including admin
     all_users = User.query.all()
     staff_users = User.query.filter(User.role != 'Admin').all()
-    admin_user = User.query.filter_by(role='Admin').first()
+    admins = User.query.filter_by(role='Admin').all()
     
     return render_template('manage_users.html', 
                           users=staff_users, 
-                          admin_user=admin_user,
+                          admins=admins,
                           all_users=all_users)
 
 @app.route('/change_password/<int:user_id>', methods=['POST'])
@@ -472,6 +500,42 @@ def change_password(user_id):
     else:
         flash('Password must be at least 4 characters long')
     
+    return redirect(url_for('manage_users'))
+
+@app.route('/change_own_password', methods=['POST'])
+@login_required
+def change_own_password():
+    if current_user.role != 'Admin':
+        return "Unauthorized", 403
+
+    current_password = request.form.get('current_password')
+    new_password = request.form.get('new_password')
+    confirm_password = request.form.get('confirm_password')
+
+    if not current_password or not new_password or not confirm_password:
+        flash('All password fields are required')
+        return redirect(url_for('manage_users'))
+
+    if current_password != current_user.password:
+        flash('Current password is incorrect')
+        return redirect(url_for('manage_users'))
+
+    if new_password != confirm_password:
+        flash('New passwords do not match')
+        return redirect(url_for('manage_users'))
+
+    if len(new_password) < 4:
+        flash('Password must be at least 4 characters long')
+        return redirect(url_for('manage_users'))
+
+    if new_password == current_user.password:
+        flash('New password must be different from current password')
+        return redirect(url_for('manage_users'))
+
+    current_user.password = new_password
+    db.session.commit()
+    log_action('Changed own password')
+    flash('Password changed successfully')
     return redirect(url_for('manage_users'))
 
 @app.route('/patient_history')
@@ -671,6 +735,12 @@ def generate_report(test_id):
     story.append(Paragraph("Results", heading_style))
     story.append(Paragraph(test.result_data or "No results available", styles['Normal']))
     story.append(Spacer(1, 0.5*inch))
+
+    # Doctor's Remark
+    if test.doctor_remark:
+        story.append(Paragraph("Doctor's Remark", heading_style))
+        story.append(Paragraph(test.doctor_remark, styles['Normal']))
+        story.append(Spacer(1, 0.5*inch))
     
     # Footer
     story.append(Paragraph("_" * 50, styles['Normal']))

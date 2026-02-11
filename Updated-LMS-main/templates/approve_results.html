@@ -268,6 +268,18 @@
         box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
     }
 
+    .remark-textarea {
+        width: 100%;
+        min-height: 90px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        font-size: 13px;
+        color: #334155;
+        resize: vertical;
+        background: #f8fafc;
+    }
+
     .empty-state {
         text-align: center;
         padding: 60px 20px;
@@ -348,6 +360,7 @@
                     <tr>
                         <th>Patient Details</th>
                         <th>Technician Results</th>
+                        <th>Doctor's Remark</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -366,11 +379,25 @@
                             <div class="result-preview">{{ test.result_data }}</div>
                         </td>
                         <td>
+<<<<<<< HEAD
                             <a href="{{ url_for('approve', test_id=test.id) }}" class="btn-approve">
                                 <span>✓</span> Approve
                             </a>
                             <a href="{{ url_for('request_redo', test_id=test.id) }}" class="btn-redo"
                                 style="margin-left:8px;">
+=======
+                            <textarea class="remark-textarea" name="doctor_remark"
+                                form="approve-form-{{ test.id }}"
+                                placeholder="Add doctor's remark...">{{ test.doctor_remark or '' }}</textarea>
+                        </td>
+                        <td>
+                            <form id="approve-form-{{ test.id }}" method="post" action="{{ url_for('approve', test_id=test.id) }}">
+                                <button type="submit" class="btn-approve">
+                                    <span>✓</span> Approve
+                                </button>
+                            </form>
+                            <a href="{{ url_for('request_redo', test_id=test.id) }}" class="btn-redo" style="margin-left:8px;">
+>>>>>>> 7d3e304641f1fed895402579a30073bd7829f830
                                 <span>↺</span> Request Redo
                             </a>
                         </td>

@@ -20,7 +20,9 @@
                 <th>Test Type</th>
                 <th>Technician</th>
                 <th>Date Created</th>
+                {% if status != 'Completed' and not (current_user.role == 'Receptionist' and status == 'Pending') %}
                 <th>Action</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -30,9 +32,11 @@
                 <td>{{ test.test_type }}</td>
                 <td>{{ test.technician_name }}</td>
                 <td>{{ test.date_created.strftime('%Y-%m-%d %H:%M') }}</td>
+                {% if status != 'Completed' and not (current_user.role == 'Receptionist' and status == 'Pending') %}
                 <td>
                     <a href="{{ url_for('test_results', test_id=test.id) }}" class="btn-view">View</a>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

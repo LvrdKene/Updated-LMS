@@ -658,7 +658,9 @@
         </div>
         <div class="stat-footer">
             Successfully processed
+            {% if current_user.role != 'Receptionist' %}
             <a href="{{ url_for('tests_by_status', status='completed') }}" class="btn-stats">View Completed Tests</a>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -692,6 +694,7 @@
 {% endif %}
 
 <!-- Recent Activity Section -->
+{% if current_user.role == 'Admin' %}
 <div class="recent-activity">
     <h3>Recent Activity</h3>
     {% if recent_activities %}
@@ -713,6 +716,7 @@
     </div>
     {% endif %}
 </div>
+{% endif %}
 
 
 <!-- Tests Queue (for Technicians) -->
