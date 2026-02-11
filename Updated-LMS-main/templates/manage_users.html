@@ -260,6 +260,7 @@
     .section-body {
         padding: 24px 28px;
     }
+
     .empty-state {
         text-align: center;
         padding: 60px 20px;
@@ -280,9 +281,10 @@
 
     @media (max-width: 768px) {
         .page-header {
-            padding: 28px 30px;
+            padding: 24px 20px;
         }
 
+        /* Form Optimizations */
         .password-form {
             flex-direction: column;
             align-items: stretch;
@@ -290,15 +292,52 @@
 
         .password-input {
             width: 100%;
+            margin-bottom: 8px;
         }
 
-        .btn-change {
+        .btn-change,
+        .btn-delete {
             justify-content: center;
+            width: 100%;
+            margin-top: 4px;
         }
 
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        /* Compact Table Styling */
         .table-custom th,
         .table-custom td {
-            padding: 16px;
+            padding: 12px 10px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .table-custom th {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Sticky First Column */
+        .table-custom th:first-child,
+        .table-custom td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            background: white;
+            border-right: 2px solid #e2e8f0;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-custom th:first-child {
+            background: #f8fafc;
+            z-index: 11;
+        }
+
+        .user-name {
+            font-size: 14px;
         }
     }
 </style>
@@ -361,7 +400,7 @@
 
     <div class="section-card">
         {% if users %}
-        <div class="table-responsive">
+        <div class="table-responsive-wrapper">
             <table class="table-custom">
                 <thead>
                     <tr>

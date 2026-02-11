@@ -188,8 +188,26 @@
 
     .inventory-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 24px;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    @media (max-width: 480px) {
+        .page-header {
+            padding: 24px 20px;
+        }
+
+        .inventory-card {
+            padding: 20px;
+        }
+
+        .stock-controls {
+            flex-wrap: wrap;
+        }
+
+        .btn-stock {
+            width: 100%;
+        }
     }
 
     .inventory-card {

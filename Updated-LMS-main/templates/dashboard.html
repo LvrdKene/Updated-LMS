@@ -557,7 +557,7 @@
         display: inline-block;
         margin-top: 12px;
         padding: 8px 14px;
-        background: linear-gradient(135deg,#10b981 0%,#059669 100%);
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: white;
         border-radius: 8px;
         text-decoration: none;
@@ -720,28 +720,30 @@
 <div class="table-section">
     <h3>Tests Assigned to Queue</h3>
     {% if my_tests %}
-    <table class="table-custom">
-        <thead>
-            <tr>
-                <th>Patient</th>
-                <th>Test Type</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for test in my_tests %}
-            <tr>
-                <td>{{ test.patient.name }}</td>
-                <td>{{ test.test_type }}</td>
-                <td>
-                    <a href="{{ url_for('test_results', test_id=test.id) }}" class="btn-process">
-                        Process Test
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive-wrapper">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Test Type</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in my_tests %}
+                <tr>
+                    <td>{{ test.patient.name }}</td>
+                    <td>{{ test.test_type }}</td>
+                    <td>
+                        <a href="{{ url_for('test_results', test_id=test.id) }}" class="btn-process">
+                            Process Test
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
     <div class="empty-state">
         <div class="empty-state-icon">📭</div>
@@ -756,30 +758,32 @@
 <div class="table-section">
     <h3>Redo Requested</h3>
     {% if redo_tests %}
-    <table class="table-custom">
-        <thead>
-            <tr>
-                <th>Patient</th>
-                <th>Test Type</th>
-                <th>Requested</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for test in redo_tests %}
-            <tr>
-                <td>{{ test.patient.name }}</td>
-                <td>{{ test.test_type }}</td>
-                <td>{{ test.date_created.strftime('%Y-%m-%d %H:%M') }}</td>
-                <td>
-                    <a href="{{ url_for('test_results', test_id=test.id) }}" class="btn-process">
-                        {% if current_user.role == 'Technician' %}Process Test{% else %}View{% endif %}
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive-wrapper">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Test Type</th>
+                    <th>Requested</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in redo_tests %}
+                <tr>
+                    <td>{{ test.patient.name }}</td>
+                    <td>{{ test.test_type }}</td>
+                    <td>{{ test.date_created.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <a href="{{ url_for('test_results', test_id=test.id) }}" class="btn-process">
+                            {% if current_user.role == 'Technician' %}Process Test{% else %}View{% endif %}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
     <div class="empty-state">
         <div class="empty-state-icon">🔁</div>
