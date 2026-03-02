@@ -553,6 +553,52 @@
         color: white;
     }
 
+    .btn-cancel {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-cancel:hover {
+        filter: brightness(0.95);
+    }
+
+    .patient-name-cell {
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .tests-stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .test-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        color: #312e81;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .actions-stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
     .btn-stats {
         display: inline-block;
         margin-top: 12px;
@@ -620,6 +666,10 @@
             <span class="action-icon">👥</span>
             <span class="action-text">Manage Users</span>
         </a>
+        <a href="{{ url_for('manage_tests') }}" class="action-btn">
+            <span class="action-icon">🧪</span>
+            <span class="action-text">Manage Tests</span>
+        </a>
         <a href="{{ url_for('approve_results') }}" class="action-btn">
             <span class="action-icon">✅</span>
             <span class="action-text">Approve Results</span>
@@ -663,6 +713,37 @@
             {% endif %}
         </div>
     </div>
+
+    {% if current_user.role == 'Admin' %}
+    {% if pending_approvals > 0 %}
+    <div class="stat-card purple">
+        <div class="stat-header">
+            <div class="stat-content">
+                <h3>Pending Approvals</h3>
+                <div class="stat-value">{{ pending_approvals }}</div>
+            </div>
+            <div class="stat-icon">🛂</div>
+        </div>
+        <div class="stat-footer">
+            Completed tests awaiting admin approval
+            <a href="{{ url_for('approve_results') }}" class="btn-stats">Review Approvals</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="stat-card info">
+        <div class="stat-header">
+            <div class="stat-content">
+                <h3>Today's Revenue</h3>
+                <div class="stat-value" style="font-size: 30px;">₦{{ "{:,.2f}".format(today_revenue) }}</div>
+            </div>
+            <div class="stat-icon">💰</div>
+        </div>
+        <div class="stat-footer">
+            Total confirmed payments for today
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <!-- Low Reagent Alerts -->
@@ -718,7 +799,6 @@
 </div>
 {% endif %}
 
-
 <!-- Tests Queue (for Technicians) -->
 {% if current_user.role == 'Technician' %}
 <div class="table-section">
@@ -733,14 +813,30 @@
             </tr>
         </thead>
         <tbody>
-            {% for test in my_tests %}
+            {% for patient_group in my_tests|groupby('patient.id') %}
+            {% set patient_tests = patient_group.list %}
+            {% set first_test = patient_tests[0] %}
             <tr>
-                <td>{{ test.patient.name }}</td>
-                <td>{{ test.test_type }}</td>
+                <td class="patient-name-cell">{{ first_test.patient.name }}</td>
                 <td>
-                    <a href="{{ url_for('test_results', test_id=test.id) }}" class="btn-process">
-                        Process Test
-                    </a>
+                    <div class="tests-stack">
+                        {% for test in patient_tests %}
+                        <span class="test-pill">{{ test.test_type }}</span>
+                        {% endfor %}
+                    </div>
+                </td>
+                <td>
+                    <div class="actions-stack">
+                        {% for test in patient_tests %}
+                        <a href="{{ url_for('test_results', test_id=test.id) }}" class="btn-process">
+                            Process {{ loop.index }}
+                        </a>
+                        <form method="POST" action="{{ url_for('cancel_test', test_id=test.id) }}"
+                            onsubmit="return confirm('Cancel this test request?');" style="display:inline;">
+                            <button type="submit" class="btn-cancel">Cancel {{ loop.index }}</button>
+                        </form>
+                        {% endfor %}
+                    </div>
                 </td>
             </tr>
             {% endfor %}
@@ -776,9 +872,15 @@
                 <td>{{ test.test_type }}</td>
                 <td>{{ test.date_created.strftime('%Y-%m-%d %H:%M') }}</td>
                 <td>
-                    <a href="{{ url_for('test_results', test_id=test.id) }}" class="btn-process">
-                        {% if current_user.role == 'Technician' %}Process Test{% else %}View{% endif %}
-                    </a>
+                    <div class="actions-stack">
+                        <a href="{{ url_for('test_results', test_id=test.id) }}" class="btn-process">
+                            {% if current_user.role == 'Technician' %}Process Test{% else %}View{% endif %}
+                        </a>
+                        <form method="POST" action="{{ url_for('cancel_test', test_id=test.id) }}"
+                            onsubmit="return confirm('Cancel this test request?');" style="display:inline;">
+                            <button type="submit" class="btn-cancel">Cancel</button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             {% endfor %}

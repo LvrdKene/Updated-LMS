@@ -251,6 +251,37 @@
         box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
         color: white;
     }
+
+    .btn-email {
+        padding: 10px 16px;
+        background: linear-gradient(135deg, #0ea5a3 0%, #0f766e 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(15, 118, 110, 0.3);
+    }
+
+    .btn-email:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(15, 118, 110, 0.4);
+        color: white;
+    }
+
+    .btn-email.disabled {
+        background: #cbd5e1;
+        color: #475569;
+        box-shadow: none;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
     .btn-redo {
         padding: 10px 18px;
         background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
@@ -265,6 +296,13 @@
         align-items: center;
         gap: 8px;
         box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+    }
+
+    .approval-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
     }
 
     .remark-textarea {
@@ -309,6 +347,65 @@
         font-weight: 500;
     }
 
+    .report-filters {
+        padding: 16px 18px;
+        border-bottom: 1px solid #f1f5f9;
+        background: #fafafa;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: 2fr 1.2fr 1fr 1fr auto auto;
+        gap: 10px;
+        align-items: end;
+    }
+
+    .filter-group label {
+        display: block;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #64748b;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .filter-input {
+        width: 100%;
+        padding: 9px 11px;
+        border-radius: 9px;
+        border: 1px solid #dbe2ea;
+        background: white;
+        color: #334155;
+        font-size: 13px;
+    }
+
+    .btn-filter-apply,
+    .btn-filter-reset {
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: none;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 92px;
+    }
+
+    .btn-filter-apply {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .btn-filter-reset {
+        background: #eef2f7;
+        color: #334155;
+        border: 1px solid #dbe2ea;
+    }
+
     @media (max-width: 992px) {
         .result-preview {
             max-width: 300px;
@@ -320,13 +417,81 @@
             padding: 28px 30px;
         }
 
-        .result-preview {
-            display: none;
+        .section-header {
+            padding: 16px 14px;
+            gap: 10px;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .section-title h3 {
+            font-size: 16px;
+        }
+
+        .table-custom {
+            min-width: 760px;
         }
 
         .table-custom th,
         .table-custom td {
-            padding: 16px;
+            padding: 12px 14px;
+        }
+
+        .result-preview {
+            display: block;
+            max-width: 260px;
+            font-size: 12px;
+        }
+
+        .remark-textarea {
+            min-height: 76px;
+            font-size: 12px;
+        }
+
+        .approval-actions {
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-approve,
+        .btn-redo,
+        .btn-download {
+            width: auto;
+            justify-content: center;
+        }
+
+        .filters-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-header {
+            padding: 20px 16px;
+            margin-bottom: 20px;
+        }
+
+        .page-header h2 {
+            font-size: 22px;
+            line-height: 1.2;
+        }
+
+        .page-header p {
+            font-size: 13px;
+        }
+
+        .table-custom {
+            min-width: 700px;
+        }
+
+        .report-filters {
+            padding: 12px 10px;
+        }
+
+        .filters-grid {
+            grid-template-columns: 1fr;
         }
     }
 </style>
@@ -366,7 +531,7 @@
                 <tbody>
                     {% for test in tests %}
                     <tr>
-                        <td>
+                        <td data-label="Patient Details">
                             <div class="patient-info">
                                 <span class="patient-name">{{ test.patient.name }}</span>
                                 <span class="test-type">
@@ -374,23 +539,25 @@
                                 </span>
                             </div>
                         </td>
-                        <td>
+                        <td data-label="Technician Results">
                             <div class="result-preview">{{ test.result_data }}</div>
                         </td>
-                        <td>
+                        <td data-label="Doctor's Remark">
                             <textarea class="remark-textarea" name="doctor_remark"
                                 form="approve-form-{{ test.id }}"
-                                placeholder="Add doctor's remark...">{{ test.doctor_remark or '' }}</textarea>
+                                placeholder="Add doctor's remark..." required>{{ test.doctor_remark or '' }}</textarea>
                         </td>
-                        <td>
-                            <form id="approve-form-{{ test.id }}" method="post" action="{{ url_for('approve', test_id=test.id) }}">
-                                <button type="submit" class="btn-approve">
-                                    <span>✓</span> Approve
-                                </button>
-                            </form>
-                            <a href="{{ url_for('request_redo', test_id=test.id) }}" class="btn-redo" style="margin-left:8px;">
-                                <span>↺</span> Request Redo
-                            </a>
+                        <td data-label="Action">
+                            <div class="approval-actions">
+                                <form id="approve-form-{{ test.id }}" method="post" action="{{ url_for('approve', test_id=test.id) }}">
+                                    <button type="submit" class="btn-approve">
+                                        <span>✓</span> Approve
+                                    </button>
+                                </form>
+                                <a href="{{ url_for('request_redo', test_id=test.id) }}" class="btn-redo">
+                                    <span>↺</span> Request Redo
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -415,37 +582,90 @@
             <span class="count-badge approved">Ready to Print</span>
         </div>
 
-        {% if approved_tests %}
+        <div class="report-filters">
+            <form method="GET">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label>Search</label>
+                        <input class="filter-input" type="text" name="approved_search" value="{{ approved_search }}"
+                            placeholder="Patient, test type, or result">
+                    </div>
+                    <div class="filter-group">
+                        <label>Test Type</label>
+                        <select class="filter-input" name="approved_test_type">
+                            <option value="">All</option>
+                            {% for tt in approved_test_types %}
+                            <option value="{{ tt }}" {% if approved_test_type == tt %}selected{% endif %}>{{ tt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Date From</label>
+                        <input class="filter-input" type="date" name="approved_date_from" value="{{ approved_date_from }}">
+                    </div>
+                    <div class="filter-group">
+                        <label>Date To</label>
+                        <input class="filter-input" type="date" name="approved_date_to" value="{{ approved_date_to }}">
+                    </div>
+                    <div class="filter-group">
+                        <button class="btn-filter-apply" type="submit">Apply</button>
+                    </div>
+                    <div class="filter-group">
+                        <a class="btn-filter-reset" href="{{ url_for('approve_results') }}">Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {% if approved_sessions %}
         <div class="table-responsive">
             <table class="table-custom">
                 <thead>
                     <tr>
                         <th>Patient Details</th>
+                        <th>Email</th>
                         <th>Approval Date</th>
                         <th>Report</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for test in approved_tests %}
+                    {% for session in approved_sessions %}
                     <tr>
-                        <td>
+                        <td data-label="Patient Details">
                             <div class="patient-info">
-                                <span class="patient-name">{{ test.patient.name }}</span>
+                                <span class="patient-name">{{ session.patient.name }}</span>
+                                <span class="test-type"><span>🔬</span> {{ session.tests|length }} test(s) in session</span>
                                 <span class="test-type">
-                                    <span>🔬</span> {{ test.test_type }}
+                                    {% for item in session.tests %}
+                                    {{ item.test_type }}{% if not loop.last %}, {% endif %}
+                                    {% endfor %}
                                 </span>
                             </div>
                         </td>
-                        <td>
+                        <td data-label="Email">
+                            {{ session.email or 'N/A' }}
+                        </td>
+                        <td data-label="Approval Date">
                             <div class="date-badge">
                                 <span>📅</span>
-                                {{ test.date_created.strftime('%Y-%m-%d %H:%M') }}
+                                {{ session.approval_date.strftime('%Y-%m-%d %H:%M') }}
                             </div>
                         </td>
-                        <td>
-                            <a href="{{ url_for('generate_report', test_id=test.id) }}" class="btn-download">
-                                <span>📄</span> PDF
-                            </a>
+                        <td data-label="Report">
+                            <div class="approval-actions">
+                                <a href="{{ url_for('generate_report', test_id=session.report_test_id) }}" class="btn-download">
+                                    <span>📄</span> PDF
+                                </a>
+                                {% if session.email %}
+                                <form method="post" action="{{ url_for('send_report_email', test_id=session.report_test_id) }}">
+                                    <button type="submit" class="btn-email">
+                                        <span>✉</span> Send
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="btn-email disabled">No Email</span>
+                                {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}

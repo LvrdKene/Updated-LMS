@@ -112,6 +112,15 @@
         align-items: end;
     }
 
+    .create-payment-grid {
+        grid-template-columns: minmax(260px, 1fr) minmax(170px, 210px) minmax(170px, 210px) minmax(170px, 200px);
+        align-items: end;
+    }
+
+    .create-payment-grid .test-selector-group {
+        grid-column: 1 / -1;
+    }
+
     .form-group {
         position: relative;
     }
@@ -327,6 +336,27 @@
         margin: 0;
     }
 
+    .history-filter {
+        display: grid;
+        grid-template-columns: 1.6fr 1.4fr 1fr 1fr auto;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 18px;
+    }
+
+    .history-filter .form-group {
+        min-width: 0;
+    }
+
+    .btn-filter {
+        padding: 12px 18px;
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-weight: 700;
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    }
+
     .patient-name {
         font-weight: 700;
         color: #1e293b;
@@ -344,13 +374,195 @@
         font-size: 15px;
     }
 
+    .revenue-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .revenue-grid {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 14px;
+        align-items: end;
+    }
+
+    .revenue-total {
+        font-size: 28px;
+        font-weight: 800;
+        color: #059669;
+        margin: 0;
+    }
+
+    .revenue-meta {
+        margin: 6px 0 0 0;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .btn-revenue {
+        padding: 12px 16px;
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-weight: 700;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .tests-picker {
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        background: #f8fafc;
+        padding: 12px;
+    }
+
+    .tests-search {
+        margin-bottom: 10px;
+    }
+
+    .tests-toolbar {
+        display: grid;
+        grid-template-columns: 1.4fr auto auto auto;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    #tests-patient-filter {
+        min-width: 220px;
+    }
+
+    .btn-tests {
+        border: 1px solid #dbe2ea;
+        background: white;
+        color: #334155;
+        border-radius: 9px;
+        padding: 9px 10px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn-tests:hover {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+    }
+
+    .tests-list {
+        max-height: 220px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 8px;
+    }
+
+    .test-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        border: 1px solid transparent;
+        margin-bottom: 6px;
+    }
+
+    .test-option:last-child {
+        margin-bottom: 0;
+    }
+
+    .test-option:hover {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+    }
+
+    .test-option input[type="checkbox"] {
+        margin-top: 2px;
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+    }
+
+    .test-option-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    .test-option-title {
+        color: #1e293b;
+        font-weight: 650;
+        font-size: 14px;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+
+    .test-option-sub {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .tests-empty {
+        color: #64748b;
+        font-size: 13px;
+        text-align: center;
+        padding: 12px;
+    }
+
+    .tests-error {
+        display: none;
+        margin-top: 8px;
+        color: #dc2626;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .tests-error.show {
+        display: block;
+    }
+
+    .tests-selected-count {
+        margin-top: 8px;
+        font-size: 12px;
+        color: #475569;
+        font-weight: 700;
+    }
+
     @media (max-width: 992px) {
         .form-row {
             grid-template-columns: 1fr;
         }
+
+        .create-payment-grid .test-selector-group {
+            grid-column: auto;
+        }
     }
 
     @media (max-width: 768px) {
+        .history-filter {
+            grid-template-columns: 1fr;
+        }
+
+        .revenue-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .tests-toolbar {
+            grid-template-columns: 1fr;
+        }
+
+        #tests-patient-filter {
+            min-width: 0;
+        }
+
         .section-card {
             padding: 24px 20px;
         }
@@ -381,6 +593,37 @@
         </div>
     </div>
 
+    <div class="revenue-card">
+        <div class="revenue-grid">
+            <div>
+                <h3 class="section-title" style="margin-bottom: 0;">Daily Revenue</h3>
+                <p class="revenue-total">₦{{ "{:,.2f}".format(daily_revenue_total) }}</p>
+                <p class="revenue-meta">{{ daily_revenue_count }} confirmed payment(s) on selected date</p>
+            </div>
+            <form method="GET" style="display: contents;">
+                <div class="form-group">
+                    <label>Select Date</label>
+                    <input type="date" name="revenue_date" value="{{ revenue_date }}" class="form-control-custom">
+                    {% if selected_paid_method %}
+                    <input type="hidden" name="paid_method" value="{{ selected_paid_method }}">
+                    {% endif %}
+                    {% if payment_search %}
+                    <input type="hidden" name="payment_search" value="{{ payment_search }}">
+                    {% endif %}
+                    {% if paid_date_from %}
+                    <input type="hidden" name="paid_date_from" value="{{ paid_date_from }}">
+                    {% endif %}
+                    {% if paid_date_to %}
+                    <input type="hidden" name="paid_date_to" value="{{ paid_date_to }}">
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn-revenue">View Revenue</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Create New Payment -->
     <div class="section-card">
         <div class="section-header">
@@ -388,20 +631,47 @@
             <h3 class="section-title">Record New Payment</h3>
         </div>
 
-        <form method="POST">
+        <form method="POST" id="create-payment-form">
             <input type="hidden" name="action" value="create">
-            <div class="form-row">
-                <div class="form-group">
+            <div class="form-row create-payment-grid">
+                <div class="form-group test-selector-group">
                     <label>
-                        Patient
+                        Test(s)
                         <span class="required">*</span>
                     </label>
-                    <select name="patient_id" class="form-control-custom" required>
-                        <option value="">Select Patient</option>
-                        {% for patient in patients %}
-                        <option value="{{ patient.id }}">{{ patient.name }} (ID: {{ patient.id }})</option>
+                    <div class="tests-picker">
+                        <input type="text" id="tests-search" class="form-control-custom tests-search"
+                            placeholder="Search test by patient name, test type, or test ID">
+                        <div class="tests-toolbar">
+                            <select id="tests-patient-filter" class="form-control-custom">
+                                <option value="">All patients</option>
+                            </select>
+                            <button type="button" class="btn-tests" id="select-patient-tests">Select Patient</button>
+                            <button type="button" class="btn-tests" id="select-visible-tests">Select Visible</button>
+                            <button type="button" class="btn-tests" id="clear-selected-tests">Clear</button>
+                        </div>
+                        <div class="tests-list" id="tests-list">
+                        {% if payable_tests %}
+                        {% for test in payable_tests %}
+                        <label class="test-option"
+                            data-search="#{{ test.id }} {{ test.patient.name|lower }} {{ test.test_type|lower }}"
+                            data-patient-id="{{ test.patient.id }}"
+                            data-patient-name="{{ test.patient.name }}">
+                            <input type="checkbox" name="test_ids" value="{{ test.id }}"
+                                data-price="{{ test_prices.get(test.test_type, 0) }}">
+                            <span class="test-option-meta">
+                                <span class="test-option-title">#{{ test.id }} | {{ test.patient.name }} | {{ test.test_type }}</span>
+                                <span class="test-option-sub">₦{{ "{:,.0f}".format(test_prices.get(test.test_type, 0)) }}</span>
+                            </span>
+                        </label>
                         {% endfor %}
-                    </select>
+                        {% else %}
+                        <div class="tests-empty">No payable tests available.</div>
+                        {% endif %}
+                        </div>
+                        <p id="tests-selected-count" class="tests-selected-count">0 selected</p>
+                        <p id="tests-error" class="tests-error">Select at least one test.</p>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -409,8 +679,8 @@
                         Amount (₦)
                         <span class="required">*</span>
                     </label>
-                    <input type="number" name="amount" class="form-control-custom" step="0.01" placeholder="0.00"
-                        required>
+                    <input type="number" id="amount" class="form-control-custom" step="0.01"
+                        placeholder="0.00" disabled>
                 </div>
 
                 <div class="form-group">
@@ -491,11 +761,42 @@
     </div>
 
     <!-- Payment History -->
-    <div class="section-card">
+    <div class="section-card" id="paid-history">
         <div class="section-header">
             <div class="section-icon">📜</div>
             <h3 class="section-title">Payment History (Confirmed)</h3>
         </div>
+
+        <form method="GET" class="history-filter">
+            <div class="form-group">
+                <label>Search</label>
+                <input type="text" name="payment_search" class="form-control-custom"
+                    placeholder="Payment ID, patient, method, confirmer" value="{{ payment_search }}">
+            </div>
+            <div class="form-group">
+                <label>Filter by Payment Method</label>
+                <select name="paid_method" class="form-control-custom">
+                    <option value="All" {% if selected_paid_method == 'All' %}selected{% endif %}>All Methods</option>
+                    {% for method in payment_methods %}
+                    <option value="{{ method }}" {% if selected_paid_method == method %}selected{% endif %}>{{ method }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Paid Date From</label>
+                <input type="date" name="paid_date_from" value="{{ paid_date_from }}" class="form-control-custom">
+            </div>
+            <div class="form-group">
+                <label>Paid Date To</label>
+                <input type="date" name="paid_date_to" value="{{ paid_date_to }}" class="form-control-custom">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn-filter">Apply Filter</button>
+            </div>
+            {% if revenue_date %}
+            <input type="hidden" name="revenue_date" value="{{ revenue_date }}">
+            {% endif %}
+        </form>
 
         {% if paid_payments %}
         <table class="table-custom">
@@ -546,5 +847,154 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+    const paymentForm = document.getElementById('create-payment-form');
+    const testCheckboxes = document.querySelectorAll('input[name="test_ids"]');
+    const testsSearchInput = document.getElementById('tests-search');
+    const testsPatientFilter = document.getElementById('tests-patient-filter');
+    const selectPatientBtn = document.getElementById('select-patient-tests');
+    const selectVisibleBtn = document.getElementById('select-visible-tests');
+    const clearSelectedBtn = document.getElementById('clear-selected-tests');
+    const selectedCountEl = document.getElementById('tests-selected-count');
+    const testOptions = document.querySelectorAll('.test-option');
+    const testsError = document.getElementById('tests-error');
+    const amountInput = document.getElementById('amount');
+    const historyFilterForm = document.querySelector('.history-filter');
+
+    const updateSelectedAmount = () => {
+        if (!amountInput) return;
+        let total = 0;
+        let count = 0;
+        testCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                total += Number(checkbox.getAttribute('data-price') || 0);
+                count += 1;
+            }
+        });
+        amountInput.value = count ? total.toFixed(2) : '';
+        if (selectedCountEl) {
+            selectedCountEl.textContent = `${count} selected`;
+        }
+    };
+
+    const applyOptionFilters = () => {
+        const term = (testsSearchInput ? testsSearchInput.value : '').trim().toLowerCase();
+        const selectedPatientId = testsPatientFilter ? testsPatientFilter.value : '';
+        testOptions.forEach(option => {
+            const searchable = (option.getAttribute('data-search') || '').toLowerCase();
+            const patientId = option.getAttribute('data-patient-id') || '';
+            const matchesSearch = searchable.includes(term);
+            const matchesPatient = !selectedPatientId || selectedPatientId === patientId;
+            option.style.display = (matchesSearch && matchesPatient) ? 'flex' : 'none';
+        });
+    };
+
+    if (testsPatientFilter && testOptions.length) {
+        const patientMap = new Map();
+        testOptions.forEach(option => {
+            const pid = option.getAttribute('data-patient-id') || '';
+            const pname = option.getAttribute('data-patient-name') || '';
+            if (pid && pname && !patientMap.has(pid)) {
+                patientMap.set(pid, pname);
+            }
+        });
+        Array.from(patientMap.entries())
+            .sort((a, b) => a[1].localeCompare(b[1]))
+            .forEach(([pid, pname]) => {
+                const opt = document.createElement('option');
+                opt.value = pid;
+                opt.textContent = `${pname} (#${pid})`;
+                testsPatientFilter.appendChild(opt);
+            });
+    }
+
+    if (testCheckboxes.length) {
+        testCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                if (testsError) testsError.classList.remove('show');
+                updateSelectedAmount();
+            });
+        });
+    }
+
+    if (testsSearchInput && testOptions.length) {
+        testsSearchInput.addEventListener('input', applyOptionFilters);
+    }
+
+    if (testsPatientFilter && testOptions.length) {
+        testsPatientFilter.addEventListener('change', applyOptionFilters);
+    }
+
+    if (selectVisibleBtn) {
+        selectVisibleBtn.addEventListener('click', function () {
+            testOptions.forEach(option => {
+                if (option.style.display !== 'none') {
+                    const checkbox = option.querySelector('input[name="test_ids"]');
+                    if (checkbox) checkbox.checked = true;
+                }
+            });
+            if (testsError) testsError.classList.remove('show');
+            updateSelectedAmount();
+        });
+    }
+
+    if (selectPatientBtn && testsPatientFilter) {
+        selectPatientBtn.addEventListener('click', function () {
+            const selectedPatientId = testsPatientFilter.value;
+            if (!selectedPatientId) return;
+            testOptions.forEach(option => {
+                if (option.getAttribute('data-patient-id') === selectedPatientId) {
+                    const checkbox = option.querySelector('input[name="test_ids"]');
+                    if (checkbox) checkbox.checked = true;
+                }
+            });
+            if (testsError) testsError.classList.remove('show');
+            updateSelectedAmount();
+        });
+    }
+
+    if (clearSelectedBtn) {
+        clearSelectedBtn.addEventListener('click', function () {
+            testCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            if (testsError) testsError.classList.remove('show');
+            updateSelectedAmount();
+        });
+    }
+
+    if (paymentForm) {
+        paymentForm.addEventListener('submit', function (e) {
+            const anySelected = Array.from(testCheckboxes).some(checkbox => checkbox.checked);
+            if (!anySelected) {
+                e.preventDefault();
+                if (testsError) testsError.classList.add('show');
+                return;
+            }
+            updateSelectedAmount();
+        });
+    }
+
+    if (amountInput) {
+        amountInput.value = '';
+    }
+    applyOptionFilters();
+    updateSelectedAmount();
+
+    // Preserve current viewport position after applying payment history filter.
+    if (historyFilterForm) {
+        historyFilterForm.addEventListener('submit', function () {
+            sessionStorage.setItem('payments_scroll_y', String(window.scrollY || 0));
+        });
+    }
+
+    const savedScrollY = sessionStorage.getItem('payments_scroll_y');
+    if (savedScrollY !== null) {
+        sessionStorage.removeItem('payments_scroll_y');
+        window.scrollTo(0, parseInt(savedScrollY, 10) || 0);
+    }
+
+</script>
 
 {% endblock %}

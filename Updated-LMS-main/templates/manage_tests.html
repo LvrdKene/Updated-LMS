@@ -1,0 +1,283 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    .section-card {
+        background: white;
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 18px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 2fr 1.2fr 1fr auto;
+        gap: 14px;
+        align-items: end;
+    }
+
+    .form-control-custom {
+        width: 100%;
+        padding: 12px 14px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 14px;
+        background: #f8fafc;
+    }
+
+    .btn-save {
+        padding: 12px 16px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        font-weight: 700;
+    }
+
+    .table-custom {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        min-width: 860px;
+    }
+
+    .table-custom th,
+    .table-custom td {
+        padding: 12px 14px;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+    }
+
+    .badge-active,
+    .badge-inactive {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .badge-active {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .badge-inactive {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .btn-toggle {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        color: white;
+        background: #475569;
+    }
+
+    .btn-price {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        color: white;
+        background: #2563eb;
+        margin-right: 8px;
+    }
+
+    .price-input {
+        width: 120px;
+        padding: 8px 10px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 12px;
+        margin-right: 8px;
+    }
+
+    .btn-delete {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        color: white;
+        background: #dc2626;
+        margin-left: 8px;
+    }
+
+    .action-cell {
+        min-width: 360px;
+    }
+
+    .action-stack {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .action-form {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+
+    @media (max-width: 900px) {
+        .section-card {
+            padding: 18px 14px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-save {
+            width: 100%;
+        }
+
+        .table-custom th,
+        .table-custom td {
+            padding: 10px 12px;
+            white-space: nowrap;
+        }
+
+        .action-cell {
+            min-width: 320px;
+        }
+
+        .price-input {
+            width: 96px;
+        }
+
+        .btn-price,
+        .btn-toggle,
+        .btn-delete {
+            margin: 0;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .section-card {
+            padding: 14px 10px;
+            margin-bottom: 16px;
+        }
+
+        .table-custom {
+            min-width: 760px;
+        }
+    }
+</style>
+
+<div class="section-card">
+    <div class="section-title">Add New Test</div>
+    <form method="POST">
+        <input type="hidden" name="action" value="create">
+        <div class="form-row">
+            <input type="text" name="name" class="form-control-custom" placeholder="Test name" required>
+            <select name="category" id="category_select" class="form-control-custom" required>
+                {% for category in categories %}
+                <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+                <option value="__new__">+ New Category</option>
+            </select>
+            <input type="text" name="custom_category" id="custom_category" class="form-control-custom"
+                placeholder="New category name" style="display:none;">
+            <input type="number" name="price" class="form-control-custom" min="0.01" step="0.01"
+                placeholder="Price" required>
+            <button class="btn-save" type="submit">Add Test</button>
+        </div>
+    </form>
+</div>
+
+<div class="section-card">
+    <div class="section-title">All Tests</div>
+    <div class="table-responsive-wrap">
+    <table class="table-custom">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in catalog_tests %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.category }}</td>
+                <td>₦{{ "{:,.2f}".format(item.price) }}</td>
+                <td>
+                    {% if item.is_active %}
+                    <span class="badge-active">Active</span>
+                    {% else %}
+                    <span class="badge-inactive">Inactive</span>
+                    {% endif %}
+                </td>
+                <td class="action-cell">
+                    <div class="action-stack">
+                    <form method="POST" class="action-form">
+                        <input type="hidden" name="action" value="update_price">
+                        <input type="hidden" name="test_id" value="{{ item.id }}">
+                        <input type="number" name="new_price" class="price-input" min="0.01" step="0.01"
+                            value="{{ '%.2f'|format(item.price) }}" required>
+                        <button type="submit" class="btn-price">Update Price</button>
+                    </form>
+                    <form method="POST" class="action-form">
+                        <input type="hidden" name="action" value="toggle">
+                        <input type="hidden" name="test_id" value="{{ item.id }}">
+                        <button type="submit" class="btn-toggle">
+                            {% if item.is_active %}Deactivate{% else %}Activate{% endif %}
+                        </button>
+                    </form>
+                    <form method="POST" class="action-form" onsubmit="return confirm('Delete this test permanently?');">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="test_id" value="{{ item.id }}">
+                        <button type="submit" class="btn-delete">Delete</button>
+                    </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+<script>
+    const categorySelect = document.getElementById('category_select');
+    const customCategory = document.getElementById('custom_category');
+
+    function toggleCustomCategory() {
+        if (categorySelect.value === '__new__') {
+            customCategory.style.display = '';
+            customCategory.required = true;
+        } else {
+            customCategory.style.display = 'none';
+            customCategory.required = false;
+            customCategory.value = '';
+        }
+    }
+
+    if (categorySelect && customCategory) {
+        categorySelect.addEventListener('change', toggleCustomCategory);
+        toggleCustomCategory();
+    }
+</script>
+{% endblock %}

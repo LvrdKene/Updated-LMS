@@ -34,7 +34,7 @@
             color: white;
             padding: 0;
             box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
+            z-index: 1300;
             overflow-y: auto;
             overflow-x: hidden;
             transition: all 0.3s ease;
@@ -96,6 +96,22 @@
             height: 200%;
             background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
             animation: pulse 15s ease-in-out infinite;
+        }
+
+        .sidebar-mobile-close {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 18px;
+            line-height: 1;
+            z-index: 2;
         }
 
         @keyframes pulse {
@@ -281,6 +297,67 @@
             padding: 30px;
             min-height: 100vh;
             transition: all 0.3s ease;
+            width: calc(100% - 280px);
+            max-width: 100%;
+        }
+
+        .mobile-header {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 1100;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .menu-toggle {
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 8px 12px;
+            line-height: 1;
+        }
+
+        .mobile-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            z-index: 1200;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .main-content .table-responsive-wrap {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .main-content .table-custom {
+            min-width: 680px;
+        }
+
+        .main-content img {
+            max-width: 100%;
+            height: auto;
         }
 
         .alert {
@@ -338,6 +415,7 @@
             .main-content {
                 margin-left: 70px;
                 padding: 20px;
+                width: calc(100% - 70px);
             }
         }
 
@@ -354,6 +432,67 @@
 
             .main-content {
                 margin-left: 0;
+                width: 100%;
+                padding: 14px;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .sidebar-mobile-close {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .sidebar-header {
+                padding: 24px 16px;
+                padding-right: 56px;
+            }
+
+            .sidebar.show .logo-container {
+                gap: 10px;
+                align-items: center;
+            }
+
+            .sidebar.show .logo-icon {
+                width: 42px;
+                height: 42px;
+                font-size: 20px;
+                flex-shrink: 0;
+            }
+
+            .sidebar.show .logo-text h4 {
+                font-size: 22px;
+                line-height: 1.1;
+                margin-bottom: 2px;
+            }
+
+            .sidebar.show .logo-text p {
+                font-size: 11px;
+                line-height: 1.2;
+            }
+
+            /* Restore full sidebar content on phones when opened */
+            .sidebar.show .logo-text,
+            .sidebar.show .user-info,
+            .sidebar.show .nav-section-title {
+                display: block;
+            }
+
+            .sidebar.show .nav-link-custom {
+                justify-content: flex-start;
+                padding: 12px 25px;
+                margin: 2px 15px;
+            }
+
+            .sidebar.show .nav-icon {
+                margin-right: 12px;
+            }
+
+            .sidebar.show .nav-link-custom span:not(.nav-icon) {
+                display: inline;
             }
         }
     </style>
@@ -361,8 +500,10 @@
 
 <body>
     {% if current_user.is_authenticated %}
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar(false)"></div>
     <div class="sidebar">
         <div class="sidebar-header">
+            <button class="sidebar-mobile-close" type="button" onclick="toggleSidebar(false)">×</button>
             <div class="logo-container">
                 <div class="logo-icon">G</div>
                 <div class="logo-text">
@@ -424,6 +565,10 @@
                 <span class="nav-icon">👥</span>
                 <span>Manage Users</span>
             </a>
+            <a href="{{ url_for('manage_tests') }}" class="nav-link-custom">
+                <span class="nav-icon">🧪</span>
+                <span>Manage Tests</span>
+            </a>
             {% endif %}
         </div>
 
@@ -437,6 +582,12 @@
     {% endif %}
 
     <div class="main-content">
+        {% if current_user.is_authenticated %}
+        <div class="mobile-header">
+            <button class="menu-toggle" type="button" onclick="toggleSidebar()">☰</button>
+            <p class="mobile-title">Gou-Lab Sys</p>
+        </div>
+        {% endif %}
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         <div class="alert alert-info">{{ messages[0] }}</div>
@@ -460,9 +611,36 @@
         });
 
         // Mobile menu toggle (optional enhancement)
-        function toggleSidebar() {
-            document.querySelector('.sidebar').classList.toggle('show');
+        function toggleSidebar(forceOpen) {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (!sidebar) return;
+
+            const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !sidebar.classList.contains('show');
+            sidebar.classList.toggle('show', shouldOpen);
+            if (overlay) {
+                overlay.classList.toggle('show', shouldOpen);
+            }
         }
+
+        // Auto-wrap wide tables for horizontal scrolling on small screens.
+        document.querySelectorAll('.table-custom').forEach(table => {
+            const parent = table.parentElement;
+            if (!parent || parent.classList.contains('table-responsive-wrap')) return;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'table-responsive-wrap';
+            parent.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+        });
+
+        // Close sidebar after link click on narrow screens.
+        document.querySelectorAll('.nav-link-custom').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 576) {
+                    toggleSidebar(false);
+                }
+            });
+        });
 
         // Persist sidebar scroll position
         const navSection = document.querySelector('.nav-section');

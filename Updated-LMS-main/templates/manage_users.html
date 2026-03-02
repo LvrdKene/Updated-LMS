@@ -168,6 +168,7 @@
         display: flex;
         gap: 10px;
         align-items: center;
+        flex-wrap: wrap;
     }
 
     .password-input {
@@ -260,6 +261,14 @@
     .section-body {
         padding: 24px 28px;
     }
+
+    .actions-cell {
+        min-width: 420px;
+    }
+
+    .actions-cell .delete-form {
+        margin-top: 10px;
+    }
     .empty-state {
         text-align: center;
         padding: 60px 20px;
@@ -283,9 +292,14 @@
             padding: 28px 30px;
         }
 
+        .section-body {
+            padding: 18px 14px;
+        }
+
         .password-form {
             flex-direction: column;
             align-items: stretch;
+            width: 100%;
         }
 
         .password-input {
@@ -294,11 +308,25 @@
 
         .btn-change {
             justify-content: center;
+            width: 100%;
         }
 
         .table-custom th,
         .table-custom td {
-            padding: 16px;
+            padding: 12px 14px;
+            white-space: nowrap;
+        }
+
+        .table-custom {
+            min-width: 860px;
+        }
+
+        .actions-cell {
+            min-width: 380px;
+        }
+
+        .btn-delete {
+            width: 100%;
         }
     }
 </style>
@@ -413,7 +441,7 @@
                                 {{ user.role }}
                             </span>
                         </td>
-                        <td>
+                        <td class="actions-cell">
                             <form method="POST" action="{{ url_for('change_password', user_id=user.id) }}"
                                 class="password-form">
                                 <input type="password" name="new_password" class="password-input"
@@ -424,7 +452,7 @@
                                     <span>🔒</span> Update Password
                                 </button>
                             </form>
-                            <form method="POST" action="{{ url_for('manage_users') }}">
+                            <form method="POST" action="{{ url_for('manage_users') }}" class="delete-form">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="user_id" value="{{ user.id }}">
                                 <button type="submit" class="btn-delete">Delete</button>

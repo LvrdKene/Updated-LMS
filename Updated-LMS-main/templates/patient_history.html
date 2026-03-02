@@ -76,6 +76,43 @@
         max-width: 500px;
     }
 
+    .history-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .sort-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .sort-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #475569;
+        white-space: nowrap;
+    }
+
+    .sort-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #334155;
+        background: #f8fafc;
+    }
+
+    .sort-select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        background: white;
+    }
+
     .search-icon {
         position: absolute;
         left: 18px;
@@ -234,7 +271,8 @@
     }
 
     .test-badge.pending {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+        color: #422006;
     }
 
     .test-details {
@@ -265,6 +303,39 @@
 
     .test-item:last-child {
         margin-bottom: 0;
+    }
+
+    .session-item {
+        background: white;
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 12px;
+        border: 1px solid #dbe5f1;
+    }
+
+    .session-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .session-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .session-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .session-meta {
+        font-size: 12px;
+        color: #64748b;
+        font-weight: 600;
     }
 
     .test-item-header {
@@ -357,10 +428,19 @@
 
     <!-- Search Section -->
     <div class="search-section">
-        <div class="search-wrapper">
-            <span class="search-icon">🔍</span>
-            <input type="text" class="search-input" id="searchInput"
-                placeholder="Search by patient name, ID, or contact...">
+        <div class="history-controls">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="searchInput"
+                    placeholder="Search by patient name, ID, contact, or email...">
+            </div>
+            <form method="GET" class="sort-form">
+                <label for="sortOrder" class="sort-label">Sort by Date</label>
+                <select id="sortOrder" name="sort" class="sort-select" onchange="this.form.submit()">
+                    <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest First</option>
+                    <option value="oldest" {% if selected_sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+                </select>
+            </form>
         </div>
     </div>
 
@@ -369,7 +449,7 @@
         {% if patients %}
         {% for patient in patients %}
         <div class="patient-card" data-patient-name="{{ patient.name.lower() }}" data-patient-id="{{ patient.id }}"
-            data-patient-contact="{{ patient.contact }}">
+            data-patient-contact="{{ patient.contact or '' }}" data-patient-email="{{ patient.email or '' }}">
             <div class="patient-header">
                 <div class="patient-info">
                     <h3 class="patient-name">
@@ -390,10 +470,14 @@
                             <span class="meta-value">{{ patient.contact if patient.contact else 'N/A' }}</span>
                         </div>
                         <div class="meta-item">
+                            <span class="meta-icon">✉</span>
+                            <span class="meta-value">{{ patient.email if patient.email else 'N/A' }}</span>
+                        </div>
+                        <div class="meta-item">
                             <span class="meta-icon">📅</span>
                             <span class="meta-value">
-                                {% if patient.tests %}
-                                Registered: {{ patient.tests[0].date_created.strftime('%b %d, %Y') }}
+                                {% if patient.visible_sessions %}
+                                Registered: {{ patient.visible_sessions[0].session_date.strftime('%b %d, %Y') }}
                                 {% else %}
                                 No tests
                                 {% endif %}
@@ -410,15 +494,11 @@
             </div>
 
             <!-- Tests Summary -->
-            {% if patient.tests %}
+            {% if patient.visible_sessions %}
             <div class="tests-summary">
-                {% for test in patient.tests %}
-                <span class="test-badge {{ test.status.lower() }}">
-                    {% if test.status == 'Approved' %}✓
-                    {% elif test.status == 'Completed' %}⏱
-                    {% elif test.status == 'Pending' %}⏳
-                    {% endif %}
-                    {{ test.test_type }}
+                {% for session in patient.visible_sessions %}
+                <span class="test-badge {{ session.badge_class }}">
+                    🗂 Session {{ loop.index }} | {{ session.test_count }} test(s)
                 </span>
                 {% endfor %}
             </div>
@@ -430,27 +510,40 @@
                     <div class="test-details-header">
                         🧪 Test Details
                     </div>
-                    {% if patient.tests %}
-                    {% for test in patient.tests %}
-                    <div class="test-item">
-                        <div class="test-item-header">
-                            <span class="test-type">{{ test.test_type }}</span>
-                            <span class="test-badge {{ test.status.lower() }}">
-                                {% if test.status == 'Approved' %}✓
-                                {% elif test.status == 'Completed' %}⏱
-                                {% elif test.status == 'Pending' %}⏳
-                                {% endif %}
-                                {{ test.status }}
+                    {% if patient.visible_sessions %}
+                    {% for session in patient.visible_sessions %}
+                    <div class="session-item">
+                        <div class="session-header">
+                            <span class="session-title">
+                                Session {{ loop.index }}
+                                {% if session.payment_id %}(Payment #{{ session.payment_id }}){% endif %}
+                            </span>
+                            <span class="session-meta">
+                                {{ session.test_count }} test(s) | {{ session.session_date.strftime('%b %d, %Y at %I:%M %p') }}
                             </span>
                         </div>
-                        <div class="test-date">
-                            📅 {{ test.date_created.strftime('%b %d, %Y at %I:%M %p') }}
+                        {% for test in session.tests %}
+                        <div class="test-item">
+                            <div class="test-item-header">
+                                <span class="test-type">{{ test.test_type }}</span>
+                                <span class="test-badge {{ test.status.lower() }}">
+                                    {% if test.status == 'Approved' %}✓
+                                    {% elif test.status == 'Completed' %}⏱
+                                    {% elif test.status == 'Pending' %}⏳
+                                    {% endif %}
+                                    {{ test.status }}
+                                </span>
+                            </div>
+                            <div class="test-date">
+                                📅 {{ test.date_created.strftime('%b %d, %Y at %I:%M %p') }}
+                            </div>
+                            {% if test.result_data %}
+                            <div class="test-result">{{ test.result_data }}</div>
+                            {% else %}
+                            <div class="no-result">No results available yet</div>
+                            {% endif %}
                         </div>
-                        {% if test.result_data %}
-                        <div class="test-result">{{ test.result_data }}</div>
-                        {% else %}
-                        <div class="no-result">No results available yet</div>
-                        {% endif %}
+                        {% endfor %}
                     </div>
                     {% endfor %}
                     {% else %}
@@ -479,8 +572,9 @@
             const name = card.dataset.patientName;
             const id = card.dataset.patientId;
             const contact = card.dataset.patientContact;
+            const email = card.dataset.patientEmail;
 
-            if (name.includes(searchTerm) || id.includes(searchTerm) || contact.includes(searchTerm)) {
+            if (name.includes(searchTerm) || id.includes(searchTerm) || contact.includes(searchTerm) || email.includes(searchTerm)) {
                 card.style.display = 'block';
             } else {
                 card.style.display = 'none';
